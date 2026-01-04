@@ -9,6 +9,7 @@ import { saveResult, getHistory, getBestReplay } from './utils/storage';
 import { DIFFICULTY_TEXTS } from './utils/texts';
 import { LESSONS } from './utils/lessons';
 import { generateLessonText } from './utils/generator';
+import styles from './App.module.css';
 
 function App() {
   const [mode, setMode] = useState('practice'); // 'practice' | 'lesson' | 'custom'
@@ -145,79 +146,59 @@ function App() {
 
 
   return (
-    <main className="app-container" style={{ padding: 'var(--spacing-lg)', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-      <header style={{ marginBottom: 'var(--spacing-xl)', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '700', background: 'linear-gradient(to right, var(--color-primary), var(--color-secondary))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          TypeFlow
-        </h1>
-
-        {/* Mode Toggle */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1.5rem 0' }}>
+    <main className={styles.container}>
+      <nav className={styles.navbar}>
+        <div className={styles.brand}>
+          <h1>TypeFlow</h1>
+        </div>
+        
+        <div className={styles.navTabs}>
           {['practice', 'lesson', 'custom'].map(m => (
             <button
               key={m}
               onClick={() => toggleMode(m)}
-              style={{
-                padding: '0.5rem 1.5rem',
-                background: mode === m ? 'var(--color-primary)' : 'var(--glass-bg)',
-                color: mode === m ? 'var(--color-bg)' : 'var(--color-text)',
-                borderRadius: '20px',
-                fontWeight: '600',
-                textTransform: 'capitalize'
-              }}
+              className={mode === m ? styles.activeTab : styles.tab}
             >
               {m}
             </button>
           ))}
         </div>
 
-        {/* Sudden Death Toggle */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: suddenDeath ? 'var(--color-danger, #ff4444)' : 'var(--color-text-muted)' }}>
-            <input
-              type="checkbox"
-              checked={suddenDeath}
-              onChange={(e) => setSuddenDeath(e.target.checked)}
-              style={{ accentColor: 'var(--color-danger, #ff4444)' }}
-            />
-            <span style={{ fontWeight: suddenDeath ? 'bold' : 'normal' }}>💀 Sudden Death Mode</span>
-          </label>
-        </div>
-
-        {/* Stats Button */}
-        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-          <button
+        <div className={styles.navActions}>
+          <button 
+            className={styles.statsButton}
             onClick={() => setShowStats(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--color-primary)',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              opacity: 0.8
-            }}
+            title="View detailed statistics"
           >
-            view detailed stats
+            <span className={styles.statsIcon}>📊</span>
+            <span className={styles.statsLabel}>Stats</span>
           </button>
         </div>
+      </nav>
 
+      <div className={styles.controls}>
+        <label 
+          className={`${styles.suddenDeathToggle} ${suddenDeath ? styles.suddenDeathActive : ''}`}
+          data-tooltip="Game ends immediately on your first mistake!"
+        >
+          <input
+            type="checkbox"
+            checked={suddenDeath}
+            onChange={(e) => setSuddenDeath(e.target.checked)}
+          />
+          <span className={styles.skull}>💀</span>
+          <span>Sudden Death Mode</span>
+        </label>
+      </div>
+
+      <div className={styles.content}>
         {/* Practice Selector */}
         {mode === 'practice' && (
-          <div style={{ margin: '1rem 0' }}>
+          <div className={styles.selector}>
             <select
               value={level}
               onChange={handleLevelChange}
               disabled={status === 'running'}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                background: 'var(--glass-bg)',
-                color: 'var(--color-text)',
-                border: '1px solid var(--glass-border)',
-                fontSize: '1rem',
-                outline: 'none'
-              }}
             >
               <option value="basic">Basic Mode</option>
               <option value="intermediate">Intermediate Mode</option>
@@ -228,79 +209,47 @@ function App() {
 
         {/* Custom Text Input */}
         {mode === 'custom' && status === 'idle' && (
-          <div style={{ maxWidth: '600px', margin: '0 auto 2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className={styles.customTextArea}>
             <textarea
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
               placeholder="Paste your text here..."
-              style={{
-                width: '100%',
-                minHeight: '120px',
-                padding: '1rem',
-                borderRadius: '12px',
-                background: 'var(--glass-bg)',
-                border: '1px solid var(--glass-border)',
-                color: 'var(--color-text)',
-                resize: 'vertical'
-              }}
             />
             <button
               onClick={handleCustomTextSubmit}
               disabled={!customText.trim()}
-              style={{
-                padding: '0.75rem 2rem',
-                background: 'var(--color-secondary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                opacity: !customText.trim() ? 0.5 : 1
-              }}
             >
               Start Typing
             </button>
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '1rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-          <div>WPM: <span style={{ color: 'var(--color-primary)', fontSize: '1.2em' }}>{stats.wpm}</span></div>
-          <div>ACC: <span style={{ color: 'var(--color-secondary)', fontSize: '1.2em' }}>{stats.accuracy}%</span></div>
+        <div className={styles.stats}>
+          <div>WPM: <span className={styles.wpmValue}>{stats.wpm}</span></div>
+          <div>ACC: <span className={styles.accValue}>{stats.accuracy}%</span></div>
           <div>STATUS: {status.toUpperCase()}</div>
         </div>
-      </header>
 
-      {/* Lesson Selector (Only in Lesson Mode and Idle state to avoid distractions) */}
-      {mode === 'lesson' && status === 'idle' && (
-        <LessonSelector
-          lessons={LESSONS}
-          currentLessonId={currentLessonId}
-          onSelect={handleLessonSelect}
-        />
-      )}
-
-      <div style={{
-        background: 'var(--glass-bg)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid var(--glass-border)',
-        borderRadius: '16px',
-        padding: 'var(--spacing-xl)',
-        minHeight: '300px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: 'var(--glass-shadow)',
-        position: 'relative'
-      }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <TypingArea
-            text={text}
-            userInput={userInput}
-            onInput={handleInput}
-            disabled={status === 'finished'}
-            inputRef={inputRef}
-            ghostIndex={ghostIndex}
+        {/* Lesson Selector (Only in Lesson Mode and Idle state to avoid distractions) */}
+        {mode === 'lesson' && status === 'idle' && (
+          <LessonSelector
+            lessons={LESSONS}
+            currentLessonId={currentLessonId}
+            onSelect={handleLessonSelect}
           />
+        )}
+
+        <div className={styles.typingContainer}>
+          <div style={{ marginBottom: '2rem' }}>
+            <TypingArea
+              text={text}
+              userInput={userInput}
+              onInput={handleInput}
+              disabled={status === 'finished'}
+              inputRef={inputRef}
+              ghostIndex={ghostIndex}
+            />
+          </div>
         </div>
       </div>
 
