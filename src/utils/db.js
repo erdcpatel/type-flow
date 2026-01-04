@@ -168,7 +168,19 @@ export const clearAllData = async () => {
         historyStore.clear();
         replaysStore.clear();
 
-        transaction.oncomplete = () => resolve();
+        transaction.oncomplete = () => {
+            // Also clear localStorage to prevent data restoration after refresh
+            try {
+                const STORAGE_KEY = 'typeflow_history';
+                localStorage.removeItem(STORAGE_KEY);
+                // Clear all replay keys
+                const replayKeys = Object.keys(localStorage).filter(key => key.startsWith('replay_'));
+                replayKeys.forEach(key => localStorage.removeItem(key));
+            } catch (error) {
+                console.error('Failed to clear localStorage:', error);
+            }
+            resolve();
+        };
         transaction.onerror = () => reject(transaction.error);
     });
 };

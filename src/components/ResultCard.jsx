@@ -1,8 +1,23 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './ResultCard.module.css';
+import { getRecentAverage, getPercentileRank } from '../utils/storage';
 
 const ResultCard = ({ stats, history, onRestart }) => {
+    const [recentAvg, setRecentAvg] = useState(null);
+    const [percentile, setPercentile] = useState(null);
+
+    // Load comparison data
+    useEffect(() => {
+        const loadComparisons = async () => {
+            const avg = await getRecentAverage(10);
+            const rank = await getPercentileRank(stats.wpm);
+            setRecentAvg(avg);
+            setPercentile(rank);
+        };
+        loadComparisons();
+    }, [stats.wpm]);
+
     // Handle Enter key press
     useEffect(() => {
         const handleKeyPress = (e) => {
@@ -15,21 +30,58 @@ const ResultCard = ({ stats, history, onRestart }) => {
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [onRestart]);
 
+    // Calculate if this is a personal best
+    const isPersonalBest = history.length > 0 && stats.wpm >= Math.max(...history.map(h => h.wpm));
+    const wpmDiff = recentAvg && recentAvg.count > 0 ? stats.wpm - recentAvg.wpm : null;
+    const accDiff = recentAvg && recentAvg.count > 0 ? stats.accuracy - recentAvg.accuracy : null;
+
     return (
         <div className={styles.overlay}>
             <div className={styles.card}>
-                <h2 className={styles.title}>Session Complete</h2>
+                <h2 className={styles.title}>
+                    {isPersonalBest && '🏆 '}Session Complete{isPersonalBest && ' - New Record!'}
+                </h2>
 
                 <div className={styles.statsGrid}>
                     <div className={styles.statItem}>
                         <span className={styles.label}>WPM</span>
-                        <span className={`${styles.value} ${styles.primary}`}>{stats.wpm}</span>
+                        <div>
+                            <span className={`${styles.value} ${styles.primary}`}>{stats.wpm}</span>
+                            {wpmDiff !== null && (
+                                <span className={styles.diff} style={{ color: wpmDiff >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                                    {wpmDiff >= 0 ? '↑' : '↓'} {Math.abs(wpmDiff)}
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className={styles.statItem}>
                         <span className={styles.label}>Accuracy</span>
-                        <span className={`${styles.value} ${styles.secondary}`}>{stats.accuracy}%</span>
+                        <div>
+                            <span className={`${styles.value} ${styles.secondary}`}>{stats.accuracy}%</span>
+                            {accDiff !== null && (
+                                <span className={styles.diff} style={{ color: accDiff >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                                    {accDiff >= 0 ? '↑' : '↓'} {Math.abs(accDiff)}%
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
+
+                {/* Performance Context */}
+                {percentile !== null && recentAvg && recentAvg.count > 0 && (
+                    <div className={styles.contextBox}>
+                        <div className={styles.contextItem}>
+                            <span className={styles.contextLabel}>Your Recent Average</span>
+                            <span className={styles.contextValue}>{recentAvg.wpm} WPM · {recentAvg.accuracy}% Acc</span>
+                        </div>
+                        <div className={styles.contextItem}>
+                            <span className={styles.contextLabel}>Percentile Rank</span>
+                            <span className={styles.contextValue}>
+                                Top {100 - percentile}% of your tests
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Key Analysis */}
                 {stats.keyStats && Object.keys(stats.keyStats).length > 0 && (
@@ -53,35 +105,72 @@ const ResultCard = ({ stats, history, onRestart }) => {
                                     </div>
                                 ))}
                             {Object.values(stats.keyStats).every(s => s.errors === 0) && (
-                                <span style={{ color: 'var(--color-primary)', fontSize: '0.9rem' }}>Perfect! No specific trouble keys.</span>
+                                <span style={{ color: 'var(--color-primary)', fontSize: '0.9rem' }}>✨ Perfect! No trouble keys this session.</span>
                             )}
                         </div>
                     </div>
                 )}
 
-                {/* Mini chart visualization (last 10 entries) */}
-                {history.length > 0 && (
-                    <div className={styles.chartContainer}>
-                        {history.slice(-15).map((entry, i) => {
-                            const height = Math.min(100, Math.max(10, (entry.wpm / 100) * 100)); // cap at 100 wpm scale
-                            return (
-                                <div
-                                    key={i}
-                                    className={styles.bar}
-                                    style={{
-                                        height: `${height}%`,
-                                        background: i === history.length - 1 ? 'var(--color-primary)' : undefined
-                                    }}
-                                    title={`WPM: ${entry.wpm}`}
-                                />
-                            );
-                        })}
+                {/* Progress Chart - Only show if we have enough data */}
+                {history.length >= 3 && (
+                    <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                        <h3 style={{ 
+                            fontSize: '1rem', 
+                            color: 'var(--color-text-muted)', 
+                            marginBottom: '0.5rem',
+                            textAlign: 'left'
+                        }}>
+                            Recent Progress
+                            <span style={{ 
+                                fontSize: '0.8rem', 
+                                marginLeft: '0.5rem', 
+                                opacity: 0.7 
+                            }}>
+                                (Last {Math.min(15, history.length)} tests)
+                            </span>
+                        </h3>
+                        <div className={styles.chartContainer}>
+                            {(() => {
+                                const recentTests = history.slice(-15);
+                                const wpmValues = recentTests.map(e => e.wpm);
+                                const minWpm = Math.min(...wpmValues);
+                                const maxWpm = Math.max(...wpmValues);
+                                const wpmRange = maxWpm - minWpm || 1; // Avoid division by zero
+                                
+                                return recentTests.map((entry, i) => {
+                                    // Scale relative to data range: 10% (min WPM) to 100% (max WPM)
+                                    const normalized = (entry.wpm - minWpm) / wpmRange;
+                                    const height = Math.round(normalized * 90 + 10);
+                                    const isCurrentTest = i === recentTests.length - 1;
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`${styles.bar} ${isCurrentTest ? styles.currentBar : ''}`}
+                                            style={{ height: `${height}%` }}
+                                            title={`${entry.wpm} WPM${isCurrentTest ? ' (Current)' : ''} • ${entry.accuracy}% accuracy`}
+                                        />
+                                    );
+                                });
+                            })()}
+                        </div>
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            fontSize: '0.75rem', 
+                            color: 'var(--color-text-muted)',
+                            marginTop: '0.25rem',
+                            paddingLeft: '1rem',
+                            paddingRight: '1rem'
+                        }}>
+                            <span>Older</span>
+                            <span style={{ color: 'var(--color-primary)' }}>← Current</span>
+                        </div>
                     </div>
                 )}
 
                 <div className={styles.actions}>
                     <button className={`${styles.button} ${styles.primaryBtn}`} onClick={onRestart}>
-                        Next Test <span style={{ opacity: 0.7, fontSize: '0.85em' }}>(Press Enter)</span>
+                        Next Test
                     </button>
                 </div>
             </div>

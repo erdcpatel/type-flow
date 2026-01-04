@@ -231,3 +231,97 @@ export const getWeakKeys = async () => {
         .slice(0, 5)
         .map(([key]) => key);
 };
+
+/**
+ * Get personal records from history
+ */
+export const getRecords = async () => {
+    const history = await getHistory();
+    
+    if (history.length === 0) {
+        return {
+            bestWpm: 0,
+            bestAccuracy: 0,
+            longestStreak: 0,
+            mostTestsInDay: 0,
+            totalTests: 0,
+            byMode: {}
+        };
+    }
+
+    const bestWpm = Math.max(...history.map(h => h.wpm));
+    const bestAccuracy = Math.max(...history.map(h => h.accuracy));
+    const streak = await getStreak();
+    
+    // Calculate most tests in a day
+    const dailyGroups = history.reduce((acc, entry) => {
+        const date = entry.dateString || new Date(entry.timestamp).toLocaleDateString('en-CA');
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+    }, {});
+    const mostTestsInDay = Math.max(...Object.values(dailyGroups), 0);
+
+    // Per-mode records
+    const byMode = {};
+    history.forEach(entry => {
+        const key = `${entry.mode}_${entry.level}`;
+        if (!byMode[key]) {
+            byMode[key] = {
+                mode: entry.mode,
+                level: entry.level,
+                bestWpm: 0,
+                bestAccuracy: 0,
+                attempts: 0
+            };
+        }
+        byMode[key].bestWpm = Math.max(byMode[key].bestWpm, entry.wpm);
+        byMode[key].bestAccuracy = Math.max(byMode[key].bestAccuracy, entry.accuracy);
+        byMode[key].attempts++;
+    });
+
+    return {
+        bestWpm,
+        bestAccuracy,
+        longestStreak: streak,
+        mostTestsInDay,
+        totalTests: history.length,
+        byMode
+    };
+};
+
+/**
+ * Get recent average for comparison (last N tests)
+ */
+export const getRecentAverage = async (count = 10) => {
+    const history = await getHistory();
+    
+    if (history.length === 0) {
+        return { wpm: 0, accuracy: 0, count: 0 };
+    }
+
+    // Sort by timestamp descending and take last N
+    const recent = history
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, count);
+
+    const totalWpm = recent.reduce((acc, h) => acc + h.wpm, 0);
+    const totalAcc = recent.reduce((acc, h) => acc + h.accuracy, 0);
+
+    return {
+        wpm: Math.round(totalWpm / recent.length),
+        accuracy: Math.round(totalAcc / recent.length),
+        count: recent.length
+    };
+};
+
+/**
+ * Calculate percentile rank for a test result
+ */
+export const getPercentileRank = async (wpm) => {
+    const history = await getHistory();
+    
+    if (history.length === 0) return 100;
+
+    const betterCount = history.filter(h => h.wpm < wpm).length;
+    return Math.round((betterCount / history.length) * 100);
+};

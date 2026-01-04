@@ -5,7 +5,7 @@ import ResultCard from './components/ResultCard';
 import LessonSelector from './components/LessonSelector';
 import StatsModal from './components/StatsModal';
 import GameOverModal from './components/GameOverModal';
-import { saveResult, getHistory, getBestReplay } from './utils/storage';
+import { saveResult, getHistory, getBestReplay, getStreak } from './utils/storage';
 import { DIFFICULTY_TEXTS } from './utils/texts';
 import { LESSONS } from './utils/lessons';
 import { generateLessonText } from './utils/generator';
@@ -20,12 +20,15 @@ function App() {
   const [customText, setCustomText] = useState('');
   const [suddenDeath, setSuddenDeath] = useState(false);
   const [ghostReplay, setGhostReplay] = useState(null);
+  const [streak, setStreak] = useState(0);
 
   // Initialize history on mount
   useEffect(() => {
     const loadHistory = async () => {
       const data = await getHistory();
       setHistory(data);
+      const streakData = await getStreak();
+      setStreak(streakData);
     };
     loadHistory();
   }, []);
@@ -80,6 +83,10 @@ function App() {
           const replay = await getBestReplay(mode, mode === 'practice' ? level : currentLessonId);
           setGhostReplay(replay ? replay.data : null);
         }
+
+        // Update streak
+        const streakData = await getStreak();
+        setStreak(streakData);
 
       } else if (status === 'idle') {
         savedRef.current = false;
@@ -165,6 +172,23 @@ function App() {
         </div>
 
         <div className={styles.navActions}>
+          {streak > 0 && (
+            <div className={styles.streakDisplay}>
+              <span className={styles.streakIcon}>🔥</span>
+              <span className={styles.streakNumber}>{streak}</span>
+            </div>
+          )}
+          <label 
+            className={`${styles.suddenDeathToggle} ${suddenDeath ? styles.suddenDeathActive : ''}`}
+            data-tooltip="Game ends immediately on your first mistake!"
+          >
+            <input
+              type="checkbox"
+              checked={suddenDeath}
+              onChange={(e) => setSuddenDeath(e.target.checked)}
+            />
+            <span className={styles.skull}>💀</span>
+          </label>
           <button 
             className={styles.statsButton}
             onClick={() => setShowStats(true)}
@@ -175,21 +199,6 @@ function App() {
           </button>
         </div>
       </nav>
-
-      <div className={styles.controls}>
-        <label 
-          className={`${styles.suddenDeathToggle} ${suddenDeath ? styles.suddenDeathActive : ''}`}
-          data-tooltip="Game ends immediately on your first mistake!"
-        >
-          <input
-            type="checkbox"
-            checked={suddenDeath}
-            onChange={(e) => setSuddenDeath(e.target.checked)}
-          />
-          <span className={styles.skull}>💀</span>
-          <span>Sudden Death Mode</span>
-        </label>
-      </div>
 
       <div className={styles.content}>
         {/* Practice Selector */}

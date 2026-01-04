@@ -331,3 +331,266 @@
     transform: scale(1.05);
     opacity: 0.9;
 }
+
+/* History Table */
+.historyTable {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.tableBody {
+    display: flex;
+    flex-direction: column;
+}
+
+.tableRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.tableRow:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tableRow.expanded {
+    background: rgba(100, 108, 255, 0.1);
+}
+
+.dateCell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.timeText {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+}
+
+.modeCell {
+    display: flex;
+    align-items: center;
+}
+
+.modeBadge {
+    background: rgba(100, 108, 255, 0.2);
+    color: var(--color-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.levelCell {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.wpmCell {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.accCell {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+.expandedDetails {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    animation: slideDown 0.2s ease-out;
+}
+
+.expandedDetails h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.miniKeysGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 0.5rem;
+}
+
+.miniKeyItem {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 0.4rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.miniKeyChar {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.miniKeyAcc {
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+/* Records */
+.recordsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.recordCard {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recordIcon {
+    font-size: 2rem;
+}
+
+.recordValue {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffd700;
+}
+
+.recordLabel {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modeRecordsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.modeRecordItem {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.modeRecordHeader {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.levelBadge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.modeRecordStats {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.recordStatLabel {
+    color: var(--color-text-muted);
+    margin-right: 0.25rem;
+}
+
+.recordStatValue {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modalContent {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab {
+        font-size: 0.85rem;
+        padding: 0.4rem;
+    }
+
+    .tableHeader,
+    .tableRow {
+        grid-template-columns: 1.5fr 0.8fr 1fr 0.8fr 0.8fr;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .keysGrid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    }
+
+    .recordsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

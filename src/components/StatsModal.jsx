@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './StatsModal.module.css';
-import { getDailyStats, getStreak, getLessonProgress, getAggregateKeyStats, resetAllData } from '../utils/storage';
+import { getDailyStats, getStreak, getLessonProgress, getAggregateKeyStats, resetAllData, getHistory, getRecords } from '../utils/storage';
 import { LESSONS } from '../utils/lessons';
 
 const StatsModal = ({ onClose, onStartDrill }) => {
@@ -8,24 +8,31 @@ const StatsModal = ({ onClose, onStartDrill }) => {
     const [streak, setStreak] = useState(0);
     const [lessonStats, setLessonStats] = useState({});
     const [keyStats, setKeyStats] = useState({});
-    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'lessons', 'keys'
+    const [history, setHistory] = useState([]);
+    const [records, setRecords] = useState(null);
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'history', 'records', 'lessons', 'keys'
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [expandedTest, setExpandedTest] = useState(null);
 
     // Load all stats on mount
     useEffect(() => {
         const loadStats = async () => {
             try {
-                const [dailyData, streakData, lessonData, keyData] = await Promise.all([
+                const [dailyData, streakData, lessonData, keyData, historyData, recordsData] = await Promise.all([
                     getDailyStats(),
                     getStreak(),
                     getLessonProgress(),
-                    getAggregateKeyStats()
+                    getAggregateKeyStats(),
+                    getHistory(),
+                    getRecords()
                 ]);
                 setStats(dailyData);
                 setStreak(streakData);
                 setLessonStats(lessonData);
                 setKeyStats(keyData);
+                setHistory(historyData.sort((a, b) => b.timestamp - a.timestamp)); // Sort newest first
+                setRecords(recordsData);
             } catch (error) {
                 console.error('Failed to load stats:', error);
             } finally {
@@ -39,16 +46,20 @@ const StatsModal = ({ onClose, onStartDrill }) => {
         try {
             await resetAllData();
             // Reload stats after reset
-            const [dailyData, streakData, lessonData, keyData] = await Promise.all([
+            const [dailyData, streakData, lessonData, keyData, historyData, recordsData] = await Promise.all([
                 getDailyStats(),
                 getStreak(),
                 getLessonProgress(),
-                getAggregateKeyStats()
+                getAggregateKeyStats(),
+                getHistory(),
+                getRecords()
             ]);
             setStats(dailyData);
             setStreak(streakData);
             setLessonStats(lessonData);
             setKeyStats(keyData);
+            setHistory(historyData);
+            setRecords(recordsData);
             setShowResetConfirm(false);
         } catch (error) {
             console.error('Failed to reset data:', error);
@@ -209,6 +220,133 @@ const StatsModal = ({ onClose, onStartDrill }) => {
         );
     };
 
+    const renderHistory = () => {
+        if (history.length === 0) {
+            return <div className={styles.noData}>No history recorded yet. Start typing!</div>;
+        }
+
+        return (
+            <div className={styles.historyTable}>
+                <div className={styles.tableHeader}>
+                    <div>Date & Time</div>
+                    <div>Mode</div>
+                    <div>Level</div>
+                    <div>WPM</div>
+                    <div>Accuracy</div>
+                </div>
+                <div className={styles.tableBody}>
+                    {history.map((test, index) => (
+                        <React.Fragment key={test.id || index}>
+                            <div 
+                                className={`${styles.tableRow} ${expandedTest === index ? styles.expanded : ''}`}
+                                onClick={() => setExpandedTest(expandedTest === index ? null : index)}
+                            >
+                                <div className={styles.dateCell}>
+                                    <div>{new Date(test.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                                    <div className={styles.timeText}>{new Date(test.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                                </div>
+                                <div className={styles.modeCell}>
+                                    <span className={styles.modeBadge}>{test.mode}</span>
+                                </div>
+                                <div className={styles.levelCell}>{test.level}</div>
+                                <div className={styles.wpmCell}>{test.wpm}</div>
+                                <div className={styles.accCell}>{test.accuracy}%</div>
+                            </div>
+                            {expandedTest === index && test.keyStats && (
+                                <div className={styles.expandedDetails}>
+                                    <h4>Key Performance</h4>
+                                    <div className={styles.miniKeysGrid}>
+                                        {Object.entries(test.keyStats)
+                                            .sort((a, b) => {
+                                                const accA = ((a[1].total - a[1].errors) / a[1].total) * 100;
+                                                const accB = ((b[1].total - b[1].errors) / b[1].total) * 100;
+                                                return accA - accB;
+                                            })
+                                            .map(([key, data]) => {
+                                                const acc = Math.round(((data.total - data.errors) / data.total) * 100);
+                                                let color = 'var(--color-success)';
+                                                if (acc < 80) color = 'var(--color-danger)';
+                                                else if (acc < 94) color = 'var(--color-warning)';
+                                                
+                                                return (
+                                                    <div key={key} className={styles.miniKeyItem} style={{ borderColor: color }}>
+                                                        <span className={styles.miniKeyChar}>{key}</span>
+                                                        <span className={styles.miniKeyAcc} style={{ color }}>{acc}%</span>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    const renderRecords = () => {
+        if (!records || records.totalTests === 0) {
+            return <div className={styles.noData}>No records yet. Start typing to set your first record!</div>;
+        }
+
+        return (
+            <div>
+                <h3 className={styles.sectionTitle}>Personal Bests</h3>
+                <div className={styles.recordsGrid}>
+                    <div className={styles.recordCard}>
+                        <div className={styles.recordIcon}>🏆</div>
+                        <div className={styles.recordValue}>{records.bestWpm}</div>
+                        <div className={styles.recordLabel}>Best WPM</div>
+                    </div>
+                    <div className={styles.recordCard}>
+                        <div className={styles.recordIcon}>🎯</div>
+                        <div className={styles.recordValue}>{records.bestAccuracy}%</div>
+                        <div className={styles.recordLabel}>Best Accuracy</div>
+                    </div>
+                    <div className={styles.recordCard}>
+                        <div className={styles.recordIcon}>🔥</div>
+                        <div className={styles.recordValue}>{records.longestStreak}</div>
+                        <div className={styles.recordLabel}>Longest Streak</div>
+                    </div>
+                    <div className={styles.recordCard}>
+                        <div className={styles.recordIcon}>📅</div>
+                        <div className={styles.recordValue}>{records.mostTestsInDay}</div>
+                        <div className={styles.recordLabel}>Most Tests/Day</div>
+                    </div>
+                </div>
+
+                <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>Records by Mode</h3>
+                <div className={styles.modeRecordsList}>
+                    {Object.values(records.byMode)
+                        .sort((a, b) => b.bestWpm - a.bestWpm)
+                        .map((record, index) => (
+                            <div key={index} className={styles.modeRecordItem}>
+                                <div className={styles.modeRecordHeader}>
+                                    <span className={styles.modeBadge}>{record.mode}</span>
+                                    <span className={styles.levelBadge}>{record.level}</span>
+                                </div>
+                                <div className={styles.modeRecordStats}>
+                                    <div>
+                                        <span className={styles.recordStatLabel}>Best WPM:</span>
+                                        <span className={styles.recordStatValue}>{record.bestWpm}</span>
+                                    </div>
+                                    <div>
+                                        <span className={styles.recordStatLabel}>Best Acc:</span>
+                                        <span className={styles.recordStatValue}>{record.bestAccuracy}%</span>
+                                    </div>
+                                    <div>
+                                        <span className={styles.recordStatLabel}>Attempts:</span>
+                                        <span className={styles.recordStatValue}>{record.attempts}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className={styles.modalOverlay} onClick={onClose}>
             <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -226,6 +364,18 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                         Overview
                     </button>
                     <button
+                        className={`${styles.tab} ${activeTab === 'history' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('history')}
+                    >
+                        History
+                    </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'records' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('records')}
+                    >
+                        Records
+                    </button>
+                    <button
                         className={`${styles.tab} ${activeTab === 'lessons' ? styles.activeTab : ''}`}
                         onClick={() => setActiveTab('lessons')}
                     >
@@ -241,6 +391,8 @@ const StatsModal = ({ onClose, onStartDrill }) => {
 
                 <div className={styles.tabContent}>
                     {activeTab === 'overview' && renderOverview()}
+                    {activeTab === 'history' && renderHistory()}
+                    {activeTab === 'records' && renderRecords()}
                     {activeTab === 'lessons' && renderLessons()}
                     {activeTab === 'keys' && renderKeys()}
                 </div>
