@@ -9,17 +9,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border);
   gap: 2rem;
   margin-bottom: 0;
 }
 
-.brand h1 {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  font-size: 2rem;
+  animation: pulse-glow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(96, 239, 255, 0.5));
+}
+
+.brandText {
   margin: 0;
-  font-size: 1.75rem;
-  background: linear-gradient(135deg, #60efff, #0061ff);
+  font-size: 1.5rem;
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -36,7 +49,7 @@
 .tab,
 .activeTab {
   padding: 0.5rem 1.5rem;
-  border: none;
+  border: 1px solid rgba(96, 239, 255, 0.2);
   border-radius: 1.5rem;
   background: transparent;
   color: rgba(255, 255, 255, 0.6);
@@ -48,13 +61,17 @@
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-hover);
   color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(96, 239, 255, 0.4);
+  transform: translateY(-1px);
 }
 
 .activeTab {
-  background: #60efff;
-  color: #1a1a2e;
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border-color: var(--color-primary);
+  transform: translateY(0);
 }
 
 .navActions {
@@ -68,20 +85,21 @@
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
   border: 1px solid rgba(96, 239, 255, 0.3);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-xl);
   background: rgba(96, 239, 255, 0.1);
-  color: #60efff;
+  color: var(--color-primary);
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-all);
   position: relative;
 }
 
 .statsButton:hover {
   background: rgba(96, 239, 255, 0.2);
-  border-color: rgba(96, 239, 255, 0.5);
-  transform: translateY(-1px);
+  border-color: var(--color-primary);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-glow);
 }
 
 .statsButton::after {
@@ -138,22 +156,22 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-light);
+  color: var(--color-text-muted);
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-all);
   position: relative;
 }
 
 .settingsButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 1);
-  transform: translateY(-1px);
+  background: var(--color-bg-hover);
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .settingsButton::after {
@@ -210,17 +228,18 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 1.5rem;
-  transition: all 0.2s ease;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-xl);
+  transition: var(--transition-all);
   cursor: default;
   position: relative;
 }
 
 .bestWpmDisplay:hover {
-  background: rgba(255, 215, 0, 0.15);
-  transform: translateY(-1px);
+  background: rgba(251, 191, 36, 0.15);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
 }
 
 .bestWpmDisplay::after {

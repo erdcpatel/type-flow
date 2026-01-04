@@ -163,7 +163,8 @@ function App() {
     <main className={styles.container}>
       <nav className={styles.navbar}>
         <div className={styles.brand}>
-          <h1>TypeFlow</h1>
+          <span className={styles.logo}>⚡</span>
+          <h1 className={styles.brandText}>TypeFlow</h1>
         </div>
         
         <div className={styles.navTabs}>

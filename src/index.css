@@ -1,38 +1,8 @@
+/* Design Tokens */
+@import './design-tokens.css';
+
 /* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
-
-:root {
-  /* HSL Values for easy opacity manipulation */
-  --bg-dark-hsl: 220, 30%, 8%;
-  --primary-hsl: 180, 100%, 50%; /* Cyan */
-  --secondary-hsl: 270, 100%, 65%; /* Purple */
-  --text-main-hsl: 220, 20%, 95%;
-  --text-muted-hsl: 220, 20%, 70%;
-  --glass-bg-hsl: 220, 30%, 15%;
-
-  /* Colors */
-  --color-bg: hsl(var(--bg-dark-hsl));
-  --color-primary: hsl(var(--primary-hsl));
-  --color-secondary: hsl(var(--secondary-hsl));
-  --color-text: hsl(var(--text-main-hsl));
-  --color-text-muted: hsl(var(--text-muted-hsl));
-  
-  /* Glassmorphism */
-  --glass-bg: hsla(var(--glass-bg-hsl), 0.4);
-  --glass-border: hsla(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.37);
-
-  /* Spacing */
-  --spacing-xs: 0.5rem;
-  --spacing-sm: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 4rem;
-
-  /* Typography */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'Roboto Mono', monospace;
-}
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -44,13 +14,13 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(circle at 10% 20%, hsla(var(--secondary-hsl), 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, hsla(var(--primary-hsl), 0.15) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(167, 139, 250, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(96, 239, 255, 0.15) 0%, transparent 40%);
 }
 
 #root {
