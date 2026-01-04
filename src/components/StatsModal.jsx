@@ -11,7 +11,6 @@ const StatsModal = ({ onClose, onStartDrill }) => {
     const [history, setHistory] = useState([]);
     const [records, setRecords] = useState(null);
     const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'history', 'records', 'lessons', 'keys'
-    const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [expandedTest, setExpandedTest] = useState(null);
 
@@ -41,46 +40,6 @@ const StatsModal = ({ onClose, onStartDrill }) => {
         };
         loadStats();
     }, []);
-
-    const handleReset = async () => {
-        try {
-            await resetAllData();
-            // Reload stats after reset
-            const [dailyData, streakData, lessonData, keyData, historyData, recordsData] = await Promise.all([
-                getDailyStats(),
-                getStreak(),
-                getLessonProgress(),
-                getAggregateKeyStats(),
-                getHistory(),
-                getRecords()
-            ]);
-            setStats(dailyData);
-            setStreak(streakData);
-            setLessonStats(lessonData);
-            setKeyStats(keyData);
-            setHistory(historyData);
-            setRecords(recordsData);
-            setShowResetConfirm(false);
-        } catch (error) {
-            console.error('Failed to reset data:', error);
-        }
-    };
-
-    // Handle keyboard events for reset confirmation
-    useEffect(() => {
-        if (!showResetConfirm) return;
-
-        const handleKeyPress = (e) => {
-            if (e.key === 'Enter') {
-                handleReset();
-            } else if (e.key === 'Escape') {
-                setShowResetConfirm(false);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [showResetConfirm]);
 
     if (loading) {
         return (
@@ -292,31 +251,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
 
         return (
             <div>
-                <h3 className={styles.sectionTitle}>Personal Bests</h3>
-                <div className={styles.recordsGrid}>
-                    <div className={styles.recordCard}>
-                        <div className={styles.recordIcon}>🏆</div>
-                        <div className={styles.recordValue}>{records.bestWpm}</div>
-                        <div className={styles.recordLabel}>Best WPM</div>
-                    </div>
-                    <div className={styles.recordCard}>
-                        <div className={styles.recordIcon}>🎯</div>
-                        <div className={styles.recordValue}>{records.bestAccuracy}%</div>
-                        <div className={styles.recordLabel}>Best Accuracy</div>
-                    </div>
-                    <div className={styles.recordCard}>
-                        <div className={styles.recordIcon}>🔥</div>
-                        <div className={styles.recordValue}>{records.longestStreak}</div>
-                        <div className={styles.recordLabel}>Longest Streak</div>
-                    </div>
-                    <div className={styles.recordCard}>
-                        <div className={styles.recordIcon}>📅</div>
-                        <div className={styles.recordValue}>{records.mostTestsInDay}</div>
-                        <div className={styles.recordLabel}>Most Tests/Day</div>
-                    </div>
-                </div>
-
-                <h3 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>Records by Mode</h3>
+                <h3 className={styles.sectionTitle}>Records by Mode</h3>
                 <div className={styles.modeRecordsList}>
                     {Object.values(records.byMode)
                         .sort((a, b) => b.bestWpm - a.bestWpm)
@@ -396,95 +331,6 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                     {activeTab === 'lessons' && renderLessons()}
                     {activeTab === 'keys' && renderKeys()}
                 </div>
-
-                {/* Reset Button */}
-                <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                    <button
-                        onClick={() => setShowResetConfirm(true)}
-                        style={{
-                            padding: '0.5rem 1.5rem',
-                            background: 'transparent',
-                            color: 'var(--color-danger, #ff4444)',
-                            border: '1px solid var(--color-danger, #ff4444)',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            opacity: 0.8,
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.opacity = '1';
-                            e.target.style.background = 'rgba(255, 68, 68, 0.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.opacity = '0.8';
-                            e.target.style.background = 'transparent';
-                        }}
-                    >
-                        🗑️ Reset All Stats
-                    </button>
-                </div>
-
-                {/* Reset Confirmation Dialog */}
-                {showResetConfirm && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '16px',
-                        zIndex: 10
-                    }}>
-                        <div style={{
-                            background: 'var(--color-bg)',
-                            padding: '2rem',
-                            borderRadius: '12px',
-                            border: '2px solid var(--color-danger, #ff4444)',
-                            maxWidth: '400px',
-                            textAlign: 'center'
-                        }}>
-                            <h3 style={{ marginBottom: '1rem', color: 'var(--color-danger, #ff4444)' }}>⚠️ Confirm Reset</h3>
-                            <p style={{ marginBottom: '1.5rem', color: 'var(--color-text-muted)' }}>
-                                This will permanently delete all your typing history, stats, and replays. This action cannot be undone.
-                            </p>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                <button
-                                    onClick={() => setShowResetConfirm(false)}
-                                    style={{
-                                        padding: '0.75rem 1.5rem',
-                                        background: 'var(--glass-bg)',
-                                        color: 'var(--color-text)',
-                                        border: '1px solid var(--glass-border)',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    Cancel <span style={{ opacity: 0.6, fontSize: '0.85em' }}>(Esc)</span>
-                                </button>
-                                <button
-                                    onClick={handleReset}
-                                    style={{
-                                        padding: '0.75rem 1.5rem',
-                                        background: 'var(--color-danger, #ff4444)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    Yes, Reset Everything <span style={{ opacity: 0.8, fontSize: '0.85em' }}>(Enter)</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

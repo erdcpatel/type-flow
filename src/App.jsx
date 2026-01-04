@@ -4,8 +4,9 @@ import TypingArea from './components/TypingArea';
 import ResultCard from './components/ResultCard';
 import LessonSelector from './components/LessonSelector';
 import StatsModal from './components/StatsModal';
+import SettingsModal from './components/SettingsModal';
 import GameOverModal from './components/GameOverModal';
-import { saveResult, getHistory, getBestReplay, getStreak } from './utils/storage';
+import { saveResult, getHistory, getBestReplay, getStreak, getRecords } from './utils/storage';
 import { DIFFICULTY_TEXTS } from './utils/texts';
 import { LESSONS } from './utils/lessons';
 import { generateLessonText } from './utils/generator';
@@ -17,10 +18,12 @@ function App() {
   const [currentLessonId, setCurrentLessonId] = useState(LESSONS[0].id);
   const [history, setHistory] = useState([]);
   const [showStats, setShowStats] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [customText, setCustomText] = useState('');
   const [suddenDeath, setSuddenDeath] = useState(false);
   const [ghostReplay, setGhostReplay] = useState(null);
   const [streak, setStreak] = useState(0);
+  const [bestWpm, setBestWpm] = useState(0);
 
   // Initialize history on mount
   useEffect(() => {
@@ -29,6 +32,8 @@ function App() {
       setHistory(data);
       const streakData = await getStreak();
       setStreak(streakData);
+      const recordsData = await getRecords();
+      setBestWpm(recordsData?.bestWpm || 0);
     };
     loadHistory();
   }, []);
@@ -84,9 +89,11 @@ function App() {
           setGhostReplay(replay ? replay.data : null);
         }
 
-        // Update streak
+        // Update streak and best WPM
         const streakData = await getStreak();
         setStreak(streakData);
+        const recordsData = await getRecords();
+        setBestWpm(recordsData?.bestWpm || 0);
 
       } else if (status === 'idle') {
         savedRef.current = false;
@@ -172,8 +179,14 @@ function App() {
         </div>
 
         <div className={styles.navActions}>
+          {bestWpm > 0 && (
+            <div className={styles.bestWpmDisplay} data-tooltip="Your personal best typing speed">
+              <span className={styles.trophyIcon}>🏆</span>
+              <span className={styles.bestWpmNumber}>{bestWpm}</span>
+            </div>
+          )}
           {streak > 0 && (
-            <div className={styles.streakDisplay}>
+            <div className={styles.streakDisplay} data-tooltip="Current daily streak">
               <span className={styles.streakIcon}>🔥</span>
               <span className={styles.streakNumber}>{streak}</span>
             </div>
@@ -192,10 +205,16 @@ function App() {
           <button 
             className={styles.statsButton}
             onClick={() => setShowStats(true)}
-            title="View detailed statistics"
+            data-tooltip="View detailed statistics and progress"
           >
-            <span className={styles.statsIcon}>📊</span>
-            <span className={styles.statsLabel}>Stats</span>
+            📊
+          </button>
+          <button 
+            className={styles.settingsButton}
+            onClick={() => setShowSettings(true)}
+            data-tooltip="Settings and preferences"
+          >
+            ⚙️
           </button>
         </div>
       </nav>
@@ -277,6 +296,11 @@ function App() {
       {/* Stats Modal */}
       {showStats && (
         <StatsModal onClose={() => setShowStats(false)} onStartDrill={handleStartDrill} />
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
     </main>
   );

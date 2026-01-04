@@ -71,10 +71,11 @@
   border-radius: 1.5rem;
   background: rgba(96, 239, 255, 0.1);
   color: #60efff;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .statsButton:hover {
@@ -83,12 +84,194 @@
   transform: translateY(-1px);
 }
 
+.statsButton::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.statsButton::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+}
+
+.statsButton:hover::after,
+.statsButton:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
 .statsIcon {
   font-size: 1.1rem;
 }
 
 .statsLabel {
   font-family: inherit;
+}
+
+.settingsButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.settingsButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.settingsButton::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.settingsButton::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+}
+
+.settingsButton:hover::after,
+.settingsButton:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.settingsIcon {
+  font-size: 1.1rem;
+}
+
+.settingsLabel {
+  font-family: inherit;
+}
+
+.bestWpmDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+.bestWpmDisplay:hover {
+  background: rgba(255, 215, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.bestWpmDisplay::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.bestWpmDisplay::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+}
+
+.bestWpmDisplay:hover::after,
+.bestWpmDisplay:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.trophyIcon {
+  font-size: 1.1rem;
+}
+
+.bestWpmNumber {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .streakDisplay {
@@ -100,11 +283,53 @@
   border: 1px solid rgba(255, 165, 0, 0.3);
   border-radius: 1.5rem;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .streakDisplay:hover {
   background: rgba(255, 165, 0, 0.15);
   transform: translateY(-1px);
+}
+
+.streakDisplay::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.streakDisplay::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+}
+
+.streakDisplay:hover::after,
+.streakDisplay:hover::before {
+  opacity: 1;
+  visibility: visible;
 }
 
 .streakIcon {

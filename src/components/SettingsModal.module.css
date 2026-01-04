@@ -1,0 +1,241 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modalContent {
+    background: var(--glass-bg, #2a2a2a);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    color: var(--color-text, #fff);
+    animation: slideUp 0.3s ease-out;
+}
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--color-text-muted, #888);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text, #fff);
+}
+
+.header {
+    margin-bottom: 1.5rem;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--color-text);
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.tab,
+.activeTab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.activeTab {
+    color: var(--color-primary, #60efff);
+    border-bottom-color: var(--color-primary, #60efff);
+}
+
+.tabContent {
+    min-height: 200px;
+}
+
+.dataSection {
+    padding: 1rem 0;
+}
+
+.dangerZone {
+    background: rgba(255, 68, 68, 0.05);
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.dangerZone h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: var(--color-danger, #ff4444);
+}
+
+.dangerDescription {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+}
+
+.dangerButton {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--color-danger, #ff4444);
+    border: 1px solid var(--color-danger, #ff4444);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.dangerButton:hover {
+    background: rgba(255, 68, 68, 0.1);
+    transform: translateY(-1px);
+}
+
+.dangerButton:active {
+    transform: translateY(0);
+}
+
+/* Confirmation Dialog Styles */
+.confirmOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    z-index: 10;
+}
+
+.confirmDialog {
+    background: var(--color-bg, #1a1a2e);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 2px solid var(--color-danger, #ff4444);
+    max-width: 400px;
+    text-align: center;
+}
+
+.confirmTitle {
+    margin: 0 0 1rem 0;
+    color: var(--color-danger, #ff4444);
+    font-size: 1.25rem;
+}
+
+.confirmText {
+    margin: 0 0 1.5rem 0;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.confirmButtons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.cancelButton,
+.confirmButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.cancelButton {
+    background: var(--glass-bg);
+    color: var(--color-text);
+    border: 1px solid var(--glass-border);
+}
+
+.cancelButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.confirmButton {
+    background: var(--color-danger, #ff4444);
+    color: white;
+    border: none;
+}
+
+.confirmButton:hover {
+    background: #ff3333;
+    transform: translateY(-1px);
+}
+
+.confirmButton:active {
+    transform: translateY(0);
+}
+
+.shortcut {
+    opacity: 0.6;
+    font-size: 0.85em;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
