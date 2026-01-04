@@ -5,11 +5,12 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/type-flow/',
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'landing.html'),
-        app: resolve(__dirname, 'index.html'),
+        main: resolve(__dirname, 'index.html'),
+        landing: resolve(__dirname, 'landing.html'),
       },
     },
   },

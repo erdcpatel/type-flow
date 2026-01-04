@@ -100,7 +100,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
             {LESSONS.map(lesson => {
                 const s = lessonStats[lesson.id];
                 return (
-                    <div key={lesson.id} className={styles.lessonCard}>
+                    <div key={lesson.id} className={`${styles.lessonCard} ${!s ? styles.lessonCardEmpty : ''}`}>
                         <div className={styles.lessonHeader}>
                             <strong>{lesson.title}</strong>
                             {s && <span className={styles.badge}>{s.attempts} attempts</span>}
@@ -117,7 +117,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className={styles.noData}>Not started yet</div>
+                            <div className={styles.noDataInline}>Not started</div>
                         )}
                     </div>
                 );
