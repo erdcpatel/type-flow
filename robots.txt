@@ -1,0 +1,11 @@
+# TypeFlow - Robots.txt
+# Allow all search engines to crawl all pages
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://erdcpatel.github.io/type-flow/sitemap.xml
+
+# Crawl delay (optional - be nice to servers)
+Crawl-delay: 1
