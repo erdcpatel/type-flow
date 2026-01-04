@@ -88,10 +88,8 @@ function App() {
       
       if (userFinished && !ghostFinished) {
         setBeatGhost(true);
-        console.log('🏆 You beat the ghost!');
       } else if (ghostFinished) {
         setBeatGhost(false);
-        console.log('👻 Ghost won!');
       } else {
         setBeatGhost(null);
       }
@@ -151,10 +149,8 @@ function App() {
         const replay = await getLastReplay(mode, replayKey);
         if (replay) {
           setGhostReplay({ data: replay.data, wpm: replay.wpm });
-          console.log(`✅ Ghost loaded for retry (${mode}/${replayKey}) - Last WPM: ${replay.wpm}`);
         } else {
           setGhostReplay(null);
-          console.log(`⚠️ No previous attempt found for retry (${mode}/${replayKey})`);
         }
       } else {
         setGhostReplay(null);

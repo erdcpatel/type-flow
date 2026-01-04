@@ -33,13 +33,9 @@ export const useTypingGame = (initialText = "", suddenDeath = false, ghostReplay
     // Ghost Playback Logic - Calculate ghost position based on WPM comparison
     useEffect(() => {
         if (status !== 'running' || !ghostReplay || !startTime) {
-            if (status === 'running' && !ghostReplay) {
-                console.log('⚠️ Ghost not available: No replay data');
-            }
             return;
         }
 
-        console.log('👻 Ghost mode ACTIVE - WPM:', ghostReplay.wpm);
         let animationFrameId;
         let lastLoggedIndex = -1;
 
@@ -51,7 +47,6 @@ export const useTypingGame = (initialText = "", suddenDeath = false, ghostReplay
             // Ghost WPM tells us characters per millisecond the ghost types at
             const ghostWpm = ghostReplay.wpm;
             if (!ghostWpm) {
-                console.warn('❌ Ghost WPM is missing:', ghostReplay);
                 return;
             }
             
@@ -63,11 +58,6 @@ export const useTypingGame = (initialText = "", suddenDeath = false, ghostReplay
 
             if (newIndex !== ghostIndex) {
                 setGhostIndex(newIndex);
-                // Log every 10 characters to avoid spam
-                if (newIndex % 10 === 0 && newIndex !== lastLoggedIndex) {
-                    console.log(`👻 Ghost at position ${newIndex}/${text.length}`);
-                    lastLoggedIndex = newIndex;
-                }
             }
 
             if (newIndex < text.length) {

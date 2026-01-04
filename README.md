@@ -39,8 +39,8 @@ All data is stored **locally in your browser** using IndexedDB. No signup requir
 
 ### Prerequisites
 
-- **Node.js** (v16 or higher)
-- **npm** or **yarn**
+- **Node.js** (v20.19.0 or higher)
+- **npm** (v10.0.0 or higher)
 
 ### Installation
 
@@ -70,6 +70,75 @@ npm run build
 ```
 
 The production-ready files will be in the `dist/` directory.
+
+## 🧪 Testing
+
+TypeFlow uses Vitest for testing with jsdom environment and fake-indexeddb for IndexedDB polyfills.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once (CI mode)
+npm run test:ci
+
+# Run linter
+npm run lint
+```
+
+### Test Setup
+
+Tests use `fake-indexeddb` for IndexedDB polyfills. Setup file: `src/test/setupTests.cjs`
+
+## 🌐 Browser Compatibility
+
+TypeFlow works on all modern browsers:
+
+- ✅ **Chrome** 90+ (recommended)
+- ✅ **Firefox** 88+
+- ✅ **Safari** 14+
+- ✅ **Edge** 90+
+
+**Requirements:**
+- ES6+ JavaScript support
+- IndexedDB support
+- CSS Grid and Flexbox
+
+## 🚀 Deployment
+
+### GitHub Pages (Current)
+
+```bash
+npm run deploy
+```
+
+This builds and deploys to GitHub Pages using `gh-pages`.
+
+### Other Platforms
+
+**Vercel:**
+- Connect your GitHub repository
+- Vercel will auto-detect Vite and deploy
+
+**Netlify:**
+- Drag and drop the `dist/` folder, or
+- Connect repository with build command: `npm run build`
+
+**Cloudflare Pages:**
+- Connect repository
+- Build command: `npm run build`
+- Output directory: `dist`
+
+**Build Configuration:**
+- Build command: `npm run build`
+- Output directory: `dist`
+- Node version: 20.19.0+
+
+## ⚙️ Environment Variables
+
+TypeFlow requires **no environment variables**. The application is 100% client-side with no server dependencies or API keys needed.
 
 ## 📁 Project Structure
 

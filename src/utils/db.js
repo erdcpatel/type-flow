@@ -238,7 +238,6 @@ export const migrateFromLocalStorage = async () => {
         // Check if we already have data in IndexedDB
         const existingHistory = await getAllHistory();
         if (existingHistory.length > 0) {
-            console.log('IndexedDB already has data, skipping migration');
             return;
         }
 
@@ -247,12 +246,10 @@ export const migrateFromLocalStorage = async () => {
         const localData = localStorage.getItem(STORAGE_KEY);
 
         if (!localData) {
-            console.log('No localStorage data to migrate');
             return;
         }
 
         const history = JSON.parse(localData);
-        console.log(`Migrating ${history.length} entries from localStorage to IndexedDB`);
 
         // Migrate each entry
         const db = await initDB();
@@ -289,8 +286,6 @@ export const migrateFromLocalStorage = async () => {
                 replayTransaction.onerror = () => reject(transaction.error);
             });
         }
-
-        console.log('Migration completed successfully');
     } catch (error) {
         console.error('Migration failed:', error);
     }
