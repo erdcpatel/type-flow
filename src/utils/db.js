@@ -81,8 +81,16 @@ export const saveHistoryEntry = async (result, replayData = null) => {
         const request = store.add(entry);
 
         request.onsuccess = async () => {
-            // Handle replay data if this is a personal best
+            // Handle replay data
             if (replayData && result.wpm > 0) {
+                // Always save last replay for retry comparison
+                await saveLastReplay(result.mode, result.level, {
+                    wpm: result.wpm,
+                    data: replayData,
+                    timestamp: entry.timestamp
+                });
+                
+                // Also save as best if it's a personal record
                 const bestReplay = await getBestReplay(result.mode, result.level);
                 if (!bestReplay || result.wpm > bestReplay.wpm) {
                     await saveReplay(result.mode, result.level, {
@@ -138,6 +146,43 @@ export const saveReplay = async (mode, level, replayEntry) => {
 export const getBestReplay = async (mode, level) => {
     const db = await initDB();
     const key = `${mode}_${level}`;
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([REPLAYS_STORE], 'readonly');
+        const store = transaction.objectStore(REPLAYS_STORE);
+        const request = store.get(key);
+
+        request.onsuccess = () => {
+            const result = request.result;
+            resolve(result || null);
+        };
+        request.onerror = () => reject(request.error);
+    });
+};
+
+/**
+ * Save the last replay (most recent attempt for retry comparison)
+ */
+export const saveLastReplay = async (mode, level, replayEntry) => {
+    const db = await initDB();
+    const key = `last_${mode}_${level}`;
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([REPLAYS_STORE], 'readwrite');
+        const store = transaction.objectStore(REPLAYS_STORE);
+        const request = store.put({ key, ...replayEntry });
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+};
+
+/**
+ * Get the last replay (most recent attempt for retry comparison)
+ */
+export const getLastReplay = async (mode, level) => {
+    const db = await initDB();
+    const key = `last_${mode}_${level}`;
 
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([REPLAYS_STORE], 'readonly');

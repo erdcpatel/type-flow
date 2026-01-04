@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
  * Hook to manage the typing game logic
  * @param {string} initialText - The text to type
  * @param {boolean} suddenDeath - If true, any mistake fails the game
- * @param {number[]} ghostReplay - Timestamps of a previous best run to race against
+ * @param {object} ghostReplay - Object with {data: timestamps[], wpm: number} of a previous best run
  */
 export const useTypingGame = (initialText = "", suddenDeath = false, ghostReplay = null) => {
     const [text, setText] = useState(initialText);
@@ -30,38 +30,59 @@ export const useTypingGame = (initialText = "", suddenDeath = false, ghostReplay
         setGhostIndex(0);
     }, [initialText]);
 
-    // Ghost Playback Logic
+    // Ghost Playback Logic - Calculate ghost position based on WPM comparison
     useEffect(() => {
-        if (status !== 'running' || !ghostReplay || !startTime) return;
+        if (status !== 'running' || !ghostReplay || !startTime) {
+            if (status === 'running' && !ghostReplay) {
+                console.log('⚠️ Ghost not available: No replay data');
+            }
+            return;
+        }
 
+        console.log('👻 Ghost mode ACTIVE - WPM:', ghostReplay.wpm);
         let animationFrameId;
+        let lastLoggedIndex = -1;
 
         const updateGhost = () => {
             const now = Date.now();
             const elapsed = now - startTime;
 
-            // Find how many characters the ghost has typed by this time
-            // Simple approach: find the first index where timestamp > elapsed, that index is the count
-            // Or more efficiently, just track forward from current ghostIndex
-
-            let newIndex = ghostIndex;
-            while (newIndex < ghostReplay.length && ghostReplay[newIndex] <= elapsed) {
-                newIndex++;
+            // Calculate ghost position based on WPM
+            // Ghost WPM tells us characters per millisecond the ghost types at
+            const ghostWpm = ghostReplay.wpm;
+            if (!ghostWpm) {
+                console.warn('❌ Ghost WPM is missing:', ghostReplay);
+                return;
             }
+            
+            const ghostCharsPerMs = (ghostWpm * 5) / 60000; // WPM to chars/ms (5 chars = 1 word)
+            
+            // Calculate how many characters the ghost should have typed by now
+            const ghostCharsTyped = Math.floor(elapsed * ghostCharsPerMs);
+            const newIndex = Math.min(ghostCharsTyped, text.length);
 
             if (newIndex !== ghostIndex) {
                 setGhostIndex(newIndex);
+                // Log every 10 characters to avoid spam
+                if (newIndex % 10 === 0 && newIndex !== lastLoggedIndex) {
+                    console.log(`👻 Ghost at position ${newIndex}/${text.length}`);
+                    lastLoggedIndex = newIndex;
+                }
             }
 
-            if (newIndex < ghostReplay.length) {
+            if (newIndex < text.length) {
                 animationFrameId = requestAnimationFrame(updateGhost);
             }
         };
 
         animationFrameId = requestAnimationFrame(updateGhost);
 
-        return () => cancelAnimationFrame(animationFrameId);
-    }, [status, startTime, ghostReplay, ghostIndex]);
+        return () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [status, startTime, ghostReplay, ghostIndex, text.length]);
 
     const calculateStats = useCallback(() => {
         if (!startTime) return { wpm: 0, accuracy: 0, keyStats: {} };

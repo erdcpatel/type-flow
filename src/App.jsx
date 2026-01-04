@@ -6,7 +6,7 @@ import LessonSelector from './components/LessonSelector';
 import StatsModal from './components/StatsModal';
 import SettingsModal from './components/SettingsModal';
 import GameOverModal from './components/GameOverModal';
-import { saveResult, getHistory, getBestReplay, getStreak, getRecords } from './utils/storage';
+import { saveResult, getHistory, getBestReplay, getLastReplay, getStreak, getRecords } from './utils/storage';
 import { DIFFICULTY_TEXTS } from './utils/texts';
 import { LESSONS } from './utils/lessons';
 import { generateLessonText } from './utils/generator';
@@ -15,15 +15,18 @@ import styles from './App.module.css';
 function App() {
   const [mode, setMode] = useState('practice'); // 'practice' | 'lesson' | 'custom'
   const [level, setLevel] = useState('basic');
+  const [lessonLevel, setLessonLevel] = useState('basic'); // Lesson difficulty
   const [currentLessonId, setCurrentLessonId] = useState(LESSONS[0].id);
   const [history, setHistory] = useState([]);
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [customText, setCustomText] = useState('');
   const [suddenDeath, setSuddenDeath] = useState(false);
+  const [ghostMode, setGhostMode] = useState(false);
   const [ghostReplay, setGhostReplay] = useState(null);
   const [streak, setStreak] = useState(0);
   const [bestWpm, setBestWpm] = useState(0);
+  const [lastText, setLastText] = useState('');
 
   // Initialize history on mount
   useEffect(() => {
@@ -38,35 +41,64 @@ function App() {
     loadHistory();
   }, []);
 
-  // Fetch best replay when configuration changes
+  // Fetch best replay when configuration changes - only load on explicit retry
+  // Ghost is disabled for auto-load; it only appears when user clicks Retry
   useEffect(() => {
-    const loadReplay = async () => {
-      let replay = null;
-      if (mode === 'practice') {
-        replay = await getBestReplay(mode, level);
-      } else if (mode === 'lesson') {
-        replay = await getBestReplay(mode, currentLessonId);
-      }
-      setGhostReplay(replay ? replay.data : null);
-    };
-    loadReplay();
-  }, [mode, level, currentLessonId]);
+    // Clear ghost when mode/level changes (new test scenario)
+    setGhostReplay(null);
+  }, [mode, level, currentLessonId, lessonLevel]);
 
   // Decide initial text based on mode
   const getInitialText = useCallback(() => {
     if (mode === 'practice') return DIFFICULTY_TEXTS[level];
     if (mode === 'lesson') {
       const lesson = LESSONS.find(l => l.id === currentLessonId);
-      return generateLessonText(lesson?.keys);
+      const wordCount = lessonLevel === 'basic' ? 20 : lessonLevel === 'intermediate' ? 40 : 60;
+      return generateLessonText(lesson?.keys, wordCount);
     }
     return "";
-  }, [mode, level, currentLessonId]);
+  }, [mode, level, currentLessonId, lessonLevel]);
 
   const inputRef = useRef(null);
   const savedRef = useRef(false);
 
   // Update hook usage
   const { text, userInput, status, handleInput, reset, stats, replayData, ghostIndex } = useTypingGame(getInitialText(), suddenDeath, ghostReplay);
+
+  // Calculate if user beat the ghost
+  const [beatGhost, setBeatGhost] = useState(null);
+  const [wasRacingGhost, setWasRacingGhost] = useState(false);
+  
+  // Track if we started with a ghost (not auto-refreshed after finish)
+  useEffect(() => {
+    if (status === 'running' && ghostReplay) {
+      setWasRacingGhost(true);
+    } else if (status === 'idle') {
+      setWasRacingGhost(false);
+    }
+  }, [status, ghostReplay]);
+  
+  useEffect(() => {
+    if (status === 'finished' && wasRacingGhost && ghostReplay) {
+      // User finished - did they beat the ghost?
+      // Only count correct characters for fair comparison
+      const correctChars = userInput.split('').filter((char, index) => char === text[index]).length;
+      const userFinished = correctChars === text.length;
+      const ghostFinished = ghostIndex >= text.length;
+      
+      if (userFinished && !ghostFinished) {
+        setBeatGhost(true);
+        console.log('🏆 You beat the ghost!');
+      } else if (ghostFinished) {
+        setBeatGhost(false);
+        console.log('👻 Ghost won!');
+      } else {
+        setBeatGhost(null);
+      }
+    } else if (status === 'idle') {
+      setBeatGhost(null);
+    }
+  }, [status, wasRacingGhost, ghostReplay, userInput, text, ghostIndex]);
 
   // Handle saving when finished
   useEffect(() => {
@@ -83,13 +115,6 @@ function App() {
         setHistory(newHistory);
         savedRef.current = true;
 
-        // Refresh ghost replay if we just set a new record
-        if (mode === 'practice' || mode === 'lesson') {
-          const replay = await getBestReplay(mode, mode === 'practice' ? level : currentLessonId);
-          setGhostReplay(replay ? replay.data : null);
-        }
-
-        // Update streak and best WPM
         const streakData = await getStreak();
         setStreak(streakData);
         const recordsData = await getRecords();
@@ -111,34 +136,84 @@ function App() {
     } else {
       newText = customText;
     }
+    setLastText(newText);
+    // Clear ghost for new test (not a retry)
+    setGhostReplay(null);
     reset(newText);
     if (inputRef.current) inputRef.current.focus();
+  };
+
+  const handleRetry = async () => {
+    // Retry the same exact text - load ghost only if ghost mode is enabled
+    if (lastText) {
+      if (ghostMode) {
+        const replayKey = mode === 'practice' ? level : (mode === 'lesson' ? currentLessonId : 'custom');
+        const replay = await getLastReplay(mode, replayKey);
+        if (replay) {
+          setGhostReplay({ data: replay.data, wpm: replay.wpm });
+          console.log(`✅ Ghost loaded for retry (${mode}/${replayKey}) - Last WPM: ${replay.wpm}`);
+        } else {
+          setGhostReplay(null);
+          console.log(`⚠️ No previous attempt found for retry (${mode}/${replayKey})`);
+        }
+      } else {
+        setGhostReplay(null);
+      }
+      reset(lastText);
+      if (inputRef.current) inputRef.current.focus();
+    }
   };
 
   const handleLevelChange = (e) => {
     const newLevel = e.target.value;
     setLevel(newLevel);
-    reset(DIFFICULTY_TEXTS[newLevel]);
+    const newText = DIFFICULTY_TEXTS[newLevel];
+    setLastText(newText);
+    // Clear ghost for new level
+    setGhostReplay(null);
+    reset(newText);
+    if (inputRef.current) inputRef.current.focus();
+  };
+
+  const handleLessonLevelChange = (e) => {
+    const newLevel = e.target.value;
+    setLessonLevel(newLevel);
+    const lesson = LESSONS.find(l => l.id === currentLessonId);
+    const wordCount = newLevel === 'basic' ? 20 : newLevel === 'intermediate' ? 40 : 60;
+    const newText = generateLessonText(lesson.keys, wordCount);
+    setLastText(newText);
+    setGhostReplay(null);
+    reset(newText);
     if (inputRef.current) inputRef.current.focus();
   };
 
   const handleLessonSelect = (lesson) => {
     setCurrentLessonId(lesson.id);
-    reset(generateLessonText(lesson.keys));
+    const wordCount = lessonLevel === 'basic' ? 20 : lessonLevel === 'intermediate' ? 40 : 60;
+    const newText = generateLessonText(lesson.keys, wordCount);
+    setLastText(newText);
+    // Clear ghost for new lesson
+    setGhostReplay(null);
+    reset(newText);
     if (inputRef.current) inputRef.current.focus();
   };
 
   const toggleMode = (newMode) => {
     setMode(newMode);
     // Reset game with new mode's default
+    let newText = '';
     if (newMode === 'practice') {
-      reset(DIFFICULTY_TEXTS[level]);
+      newText = DIFFICULTY_TEXTS[level];
+      reset(newText);
     } else if (newMode === 'lesson') {
       const lesson = LESSONS.find(l => l.id === currentLessonId);
-      reset(generateLessonText(lesson.keys));
+      const wordCount = lessonLevel === 'basic' ? 20 : lessonLevel === 'intermediate' ? 40 : 60;
+      newText = generateLessonText(lesson.keys, wordCount);
+      reset(newText);
     } else {
       reset("");
     }
+    setLastText(newText);
     // Only focus if we have text to type
     if (newMode !== 'custom' && inputRef.current) inputRef.current.focus();
   };
@@ -147,12 +222,16 @@ function App() {
     setShowStats(false);
     setMode('practice');
     const drillText = generateLessonText(keys, 30);
+    setLastText(drillText);
     reset(drillText);
     if (inputRef.current) inputRef.current.focus();
   };
 
   const handleCustomTextSubmit = () => {
     if (!customText.trim()) return;
+    setLastText(customText);
+    // Clear ghost for new custom text (will only show on retry)
+    setGhostReplay(null);
     reset(customText);
     if (inputRef.current) inputRef.current.focus();
   };
@@ -194,14 +273,41 @@ function App() {
           )}
           <label 
             className={`${styles.suddenDeathToggle} ${suddenDeath ? styles.suddenDeathActive : ''}`}
-            data-tooltip="Game ends immediately on your first mistake!"
+            data-tooltip="Sudden Death: Game ends immediately on your first mistake!"
           >
             <input
               type="checkbox"
               checked={suddenDeath}
-              onChange={(e) => setSuddenDeath(e.target.checked)}
+              onChange={(e) => {
+                setSuddenDeath(e.target.checked);
+                setTimeout(() => {
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }, 0);
+              }}
+              onMouseDown={(e) => e.preventDefault()}
             />
             <span className={styles.skull}>💀</span>
+          </label>
+          <label 
+            className={`${styles.ghostToggle} ${ghostMode ? styles.ghostActive : ''}`}
+            data-tooltip="Ghost Mode: Race against your best performance when you retry"
+          >
+            <input
+              type="checkbox"
+              checked={ghostMode}
+              onChange={(e) => {
+                setGhostMode(e.target.checked);
+                setTimeout(() => {
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }, 0);
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+            />
+            <span className={styles.ghostIcon}>👻</span>
           </label>
           <button 
             className={styles.statsButton}
@@ -221,21 +327,6 @@ function App() {
       </nav>
 
       <div className={styles.content}>
-        {/* Practice Selector */}
-        {mode === 'practice' && (
-          <div className={styles.selector}>
-            <select
-              value={level}
-              onChange={handleLevelChange}
-              disabled={status === 'running'}
-            >
-              <option value="basic">Basic Mode</option>
-              <option value="intermediate">Intermediate Mode</option>
-              <option value="advanced">Advanced Mode</option>
-            </select>
-          </div>
-        )}
-
         {/* Custom Text Input */}
         {mode === 'custom' && status === 'idle' && (
           <div className={styles.customTextArea}>
@@ -252,12 +343,82 @@ function App() {
             </button>
           </div>
         )}
-
+        {/* Race Bars - Completely outside text container */}
+        {ghostReplay && status === 'running' && (() => {
+          // Calculate correct characters only
+          const correctChars = userInput.split('').filter((char, index) => char === text[index]).length;
+          const userProgress = (correctChars / text.length) * 100;
+          const ghostProgress = (ghostIndex / text.length) * 100;
+          
+          return (
+            <div className={styles.raceContainer}>
+              <div className={styles.raceBar}>
+                <div className={styles.raceLabel}>You</div>
+                <div className={styles.trackOuter}>
+                  <div 
+                    className={styles.yourBar}
+                    style={{ width: `${Math.min(userProgress, 100)}%` }}
+                  >
+                    <span className={styles.barLabel}>{Math.round(userProgress)}%</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.raceBar}>
+                <div className={styles.raceLabel}>
+                  <span className={styles.ghostEmoji}>👻</span> Ghost
+                </div>
+                <div className={styles.trackOuter}>
+                  <div 
+                    className={styles.ghostBar}
+                    style={{ width: `${Math.min(ghostProgress, 100)}%` }}
+                  >
+                    <span className={styles.barLabel}>{Math.round(ghostProgress)}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         <div className={styles.stats}>
           <div>WPM: <span className={styles.wpmValue}>{stats.wpm}</span></div>
           <div>ACC: <span className={styles.accValue}>{stats.accuracy}%</span></div>
           <div>STATUS: {status.toUpperCase()}</div>
+          {status === 'running' && (
+            <button className={styles.resetButton} onClick={handleRestart}>
+              🔄 Reset
+            </button>
+          )}
         </div>
+
+        {/* Practice Level Selector */}
+        {mode === 'practice' && status === 'idle' && (
+          <div className={styles.selector}>
+            <select
+              value={level}
+              onChange={handleLevelChange}
+              disabled={status === 'running'}
+            >
+              <option value="basic">Basic Mode</option>
+              <option value="intermediate">Intermediate Mode</option>
+              <option value="advanced">Advanced Mode</option>
+            </select>
+          </div>
+        )}
+
+        {/* Lesson Level Selector */}
+        {mode === 'lesson' && status === 'idle' && (
+          <div className={styles.selector}>
+            <select
+              value={lessonLevel}
+              onChange={handleLessonLevelChange}
+              disabled={status === 'running'}
+            >
+              <option value="basic">Basic (20 words)</option>
+              <option value="intermediate">Intermediate (40 words)</option>
+              <option value="advanced">Advanced (60 words)</option>
+            </select>
+          </div>
+        )}
 
         {/* Lesson Selector (Only in Lesson Mode and Idle state to avoid distractions) */}
         {mode === 'lesson' && status === 'idle' && (
@@ -274,9 +435,9 @@ function App() {
               text={text}
               userInput={userInput}
               onInput={handleInput}
+              status={status}
               disabled={status === 'finished'}
               inputRef={inputRef}
-              ghostIndex={ghostIndex}
             />
           </div>
         </div>
@@ -291,6 +452,8 @@ function App() {
           stats={stats}
           history={history}
           onRestart={handleRestart}
+          onRetry={handleRetry}
+          beatGhost={beatGhost}
         />
       )}
 

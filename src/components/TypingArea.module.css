@@ -55,12 +55,92 @@
     animation: blink 1s infinite;
 }
 
+/* Race Container - Outside Text Box */
+.raceContainer {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.raceBar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.raceLabel {
+    min-width: 80px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.raceLabel:first-child {
+    color: var(--color-primary);
+}
+
+.ghostEmoji {
+    font-size: 1.1rem;
+}
+
+.trackOuter {
+    flex: 1;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+}
+
+.yourBar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(96, 239, 255, 0.4), rgba(167, 139, 250, 0.4));
+    border-radius: 14px;
+    transition: width 0.2s ease-out;
+    box-shadow: 
+        0 0 10px rgba(96, 239, 255, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+}
+
+.ghostBar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(167, 139, 250, 0.3), rgba(167, 139, 250, 0.4));
+    border-radius: 14px;
+    transition: width 0.1s linear;
+    box-shadow: 
+        0 0 15px rgba(167, 139, 250, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+}
+
+.barLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+}
+
 .ghost {
-    background-color: rgba(0, 255, 255, 0.2);
-    border-bottom: 2px solid cyan;
-    box-shadow: 0 0 8px cyan;
-    z-index: 5;
-    /* Ensure it stays below text but visible */
+    /* Ghost class no longer used - kept for compatibility */
+    display: none;
 }
 
 @keyframes blink {

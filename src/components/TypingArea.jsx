@@ -2,13 +2,24 @@
 import React, { useEffect } from 'react';
 import styles from './TypingArea.module.css';
 
-const TypingArea = ({ text, userInput, onInput, status, inputRef, ghostIndex }) => {
+const TypingArea = ({ text, userInput, onInput, status, inputRef }) => {
     // Auto-focus on mount or status change to running
     useEffect(() => {
         if (status !== 'finished' && inputRef?.current) {
             inputRef.current.focus();
         }
     }, [status, inputRef]);
+
+    // Additional focus trigger when text changes (mode/level change)
+    useEffect(() => {
+        if (text && status === 'idle' && inputRef?.current) {
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
+            }, 100);
+        }
+    }, [text, status, inputRef]);
 
     const handleContainerClick = () => {
         if (inputRef?.current) inputRef.current.focus();
@@ -39,10 +50,6 @@ const TypingArea = ({ text, userInput, onInput, status, inputRef, ghostIndex }) 
                             : ` ${styles.incorrect}`;
                     } else if (index === userInput.length) {
                         className += ` ${styles.current}`;
-                    }
-
-                    if (index === ghostIndex && status === 'running') {
-                        className += ` ${styles.ghost}`;
                     }
 
                     return (

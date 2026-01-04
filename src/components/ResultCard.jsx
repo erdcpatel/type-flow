@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import styles from './ResultCard.module.css';
 import { getRecentAverage, getPercentileRank } from '../utils/storage';
 
-const ResultCard = ({ stats, history, onRestart }) => {
+const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
     const [recentAvg, setRecentAvg] = useState(null);
     const [percentile, setPercentile] = useState(null);
+    const [showCelebration, setShowCelebration] = useState(false);
 
     // Load comparison data
     useEffect(() => {
@@ -16,7 +17,13 @@ const ResultCard = ({ stats, history, onRestart }) => {
             setPercentile(rank);
         };
         loadComparisons();
-    }, [stats.wpm]);
+        
+        // Trigger celebration
+        if (beatGhost !== null) {
+            setShowCelebration(true);
+            setTimeout(() => setShowCelebration(false), 3000);
+        }
+    }, [stats.wpm, beatGhost]);
 
     // Handle Enter key press
     useEffect(() => {
@@ -37,6 +44,46 @@ const ResultCard = ({ stats, history, onRestart }) => {
 
     return (
         <div className={styles.overlay}>
+            {/* Victory Celebration */}
+            {showCelebration && beatGhost === true && (
+                <>
+                    <div className={styles.particleBurst}>
+                        {Array.from({ length: 30 }).map((_, i) => (
+                            <div 
+                                key={i} 
+                                className={styles.particle}
+                                style={{
+                                    '--angle': `${(360 / 30) * i}deg`,
+                                    '--delay': `${i * 0.02}s`,
+                                    '--color': i % 3 === 0 ? '#FFD700' : i % 3 === 1 ? '#60efff' : '#a78bfa'
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className={styles.victoryText}>
+                        <span className={styles.victoryEmoji}>🏆</span>
+                        <span className={styles.victoryMessage}>CRUSHED IT!</span>
+                        <span className={styles.victorySubtext}>Ghost left in the dust</span>
+                    </div>
+                </>
+            )}
+            
+            {/* Ghost Wins */}
+            {showCelebration && beatGhost === false && (
+                <>
+                    <div className={styles.ghostReveal}>
+                        <div className={styles.bigGhost}>👻</div>
+                        <div className={styles.ghostMessage}>HAUNTED!</div>
+                        <div className={styles.ghostSubtext}>Your past self is faster... for now</div>
+                    </div>
+                    <div className={styles.ghostTrail}>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} className={styles.trailGhost} style={{ '--index': i }}>👻</span>
+                        ))}
+                    </div>
+                </>
+            )}
+            
             <div className={styles.card}>
                 <h2 className={styles.title}>
                     {isPersonalBest && '🏆 '}Session Complete{isPersonalBest && ' - New Record!'}
@@ -169,6 +216,13 @@ const ResultCard = ({ stats, history, onRestart }) => {
                 )}
 
                 <div className={styles.actions}>
+                    <button 
+                        className={`${styles.button} ${styles.secondaryBtn}`} 
+                        onClick={onRetry}
+                        title="Retry the same text to beat your time"
+                    >
+                        🔄 Retry
+                    </button>
                     <button className={`${styles.button} ${styles.primaryBtn}`} onClick={onRestart}>
                         Next Test
                     </button>

@@ -447,6 +447,91 @@
   font-size: 1.1rem;
 }
 
+/* Ghost Mode Toggle */
+.ghostToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-light);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: var(--transition-all);
+  position: relative;
+}
+
+.ghostToggle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.ghostToggle::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+}
+
+.ghostToggle:hover::after,
+.ghostToggle:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ghostToggle input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--color-secondary);
+}
+
+.ghostActive {
+  color: var(--color-secondary);
+  font-weight: bold;
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.ghostIcon {
+  font-size: 1.1rem;
+  animation: ghostFloat 2s ease-in-out infinite;
+}
+
+@keyframes ghostFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
 .content {
   padding: 0 var(--spacing-lg);
   max-width: 1200px;
@@ -472,7 +557,7 @@
 
 .customTextArea {
   max-width: 600px;
-  margin: 0 auto 2rem;
+  margin: 2rem auto 2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -506,10 +591,91 @@
   cursor: not-allowed;
 }
 
+/* Race Container - Outside text box */
+.raceContainer {
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.raceBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.raceLabel {
+  min-width: 80px;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-primary);
+}
+
+.ghostEmoji {
+  font-size: 1.1rem;
+}
+
+.trackOuter {
+  flex: 1;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.yourBar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(96, 239, 255, 0.4), rgba(167, 139, 250, 0.4));
+  border-radius: 14px;
+  transition: width 0.2s ease-out;
+  box-shadow: 
+      0 0 10px rgba(96, 239, 255, 0.2),
+      inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+}
+
+.ghostBar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.3), rgba(167, 139, 250, 0.4));
+  border-radius: 14px;
+  transition: width 0.2s ease-out;
+  box-shadow: 
+      0 0 8px rgba(167, 139, 250, 0.3),
+      inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+}
+
+.barLabel {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 .stats {
   display: flex;
   gap: 2rem;
   justify-content: center;
+  align-items: center;
   margin: 1.5rem 0;
   color: var(--color-text-muted);
   font-family: var(--font-mono);
@@ -523,6 +689,24 @@
 
 .stats span {
   font-size: 1.2em;
+}
+
+.resetButton {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover {
+  background: rgba(255, 68, 68, 0.3);
+  border-color: rgba(255, 68, 68, 0.6);
+  transform: translateY(-1px);
 }
 
 .wpmValue {

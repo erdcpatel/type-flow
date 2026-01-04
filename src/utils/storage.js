@@ -4,6 +4,7 @@ import {
     saveHistoryEntry,
     getAllHistory,
     getBestReplay as getReplayFromDB,
+    getLastReplay as getLastReplayFromDB,
     clearAllData,
     migrateFromLocalStorage
 } from './db';
@@ -29,6 +30,11 @@ export const saveResult = async (result, replayData = null) => {
 export const getBestReplay = async (mode, level) => {
     await ensureMigration();
     return await getReplayFromDB(mode, level);
+};
+
+export const getLastReplay = async (mode, level) => {
+    await ensureMigration();
+    return await getLastReplayFromDB(mode, level);
 };
 
 export const getHistory = async () => {
