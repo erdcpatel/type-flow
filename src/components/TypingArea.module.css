@@ -1,0 +1,76 @@
+.container {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    line-height: 1.8;
+    width: 100%;
+    max-width: 900px;
+    outline: none;
+    cursor: text;
+}
+
+.input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: default;
+    z-index: 10;
+}
+
+.display {
+    color: var(--color-text-muted);
+    word-break: break-word;
+    user-select: none;
+}
+
+.char {
+    position: relative;
+    transition: color 0.1s ease;
+}
+
+.char.correct {
+    color: var(--color-text);
+}
+
+.char.incorrect {
+    color: var(--color-secondary);
+    text-decoration: underline;
+}
+
+.char.current {
+    color: var(--color-primary);
+}
+
+.char.current::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-primary);
+    animation: blink 1s infinite;
+}
+
+.ghost {
+    background-color: rgba(0, 255, 255, 0.2);
+    border-bottom: 2px solid cyan;
+    box-shadow: 0 0 8px cyan;
+    z-index: 5;
+    /* Ensure it stays below text but visible */
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
