@@ -46,7 +46,7 @@ All data is stored **locally in your browser** using IndexedDB. No signup requir
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/type-flow.git
+   git clone https://github.com/erdcpatel/type-flow.git
    cd type-flow
    ```
 

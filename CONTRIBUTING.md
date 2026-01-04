@@ -11,7 +11,7 @@ TypeFlow is an open-source project and we love receiving contributions from our 
 Fork the repo on GitHub and clone it to your local machine.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/type-flow.git
+git clone https://github.com/erdcpatel/type-flow.git
 cd type-flow
 npm install
 ```
