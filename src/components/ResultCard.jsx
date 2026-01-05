@@ -17,13 +17,16 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
             setPercentile(rank);
         };
         loadComparisons();
-        
-        // Trigger celebration
+    }, [stats.wpm]);
+
+    // Trigger celebration when beatGhost is set (separate effect)
+    useEffect(() => {
         if (beatGhost !== null) {
             setShowCelebration(true);
-            setTimeout(() => setShowCelebration(false), 3000);
+            const timer = setTimeout(() => setShowCelebration(false), 3000);
+            return () => clearTimeout(timer);
         }
-    }, [stats.wpm, beatGhost]);
+    }, [beatGhost]);
 
     // Handle Enter key press
     useEffect(() => {

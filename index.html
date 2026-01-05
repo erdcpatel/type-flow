@@ -61,10 +61,10 @@
     <header>
         <nav class="nav">
         <div class="nav-brand">
-            <span class="logo">⚡</span>
+            <span class="logo" aria-hidden="true">⚡</span>
             <span class="brand-text">TypeFlow</span>
         </div>
-        <a href="./app.html" class="nav-link">Launch App →</a>
+        <a href="./app.html" class="nav-link" aria-label="Launch TypeFlow application">Launch App →</a>
     </nav>
     </header>
 
@@ -82,13 +82,13 @@
 
             <!-- Live Typing Demo -->
             <div class="typing-demo">
-                <div class="demo-stats">
+                <div class="demo-stats" role="status" aria-live="polite">
                     <div class="stat">
-                        <span class="stat-value" id="demo-wpm">0</span>
+                        <span class="stat-value" id="demo-wpm" aria-label="Words per minute">0</span>
                         <span class="stat-label">WPM</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value" id="demo-acc">100<span style="font-size: 0.6em;">%</span></span>
+                        <span class="stat-value" id="demo-acc" aria-label="Accuracy percentage">100<span style="font-size: 0.6em;">%</span></span>
                         <span class="stat-label">Accuracy</span>
                     </div>
                 </div>
@@ -104,12 +104,12 @@
 
             <!-- CTA Buttons -->
             <div class="cta-buttons">
-                <a href="./app.html" class="btn btn-primary">
+                <a href="./app.html" class="btn btn-primary" aria-label="Start typing test for free">
                     <span>Start Typing Free</span>
-                    <span class="btn-icon">→</span>
+                    <span class="btn-icon" aria-hidden="true">→</span>
                 </a>
-                <button class="btn btn-secondary" id="demo-btn">
-                    <span>▶</span>
+                <button class="btn btn-secondary" id="demo-btn" aria-label="Restart typing demo animation">
+                    <span aria-hidden="true">▶</span>
                     Watch Demo
                 </button>
             </div>
@@ -121,7 +121,7 @@
         <div class="features-grid">
             <!-- Feature 1 -->
             <article class="feature-card" data-tilt>
-                <div class="feature-icon">🏆</div>
+                <div class="feature-icon" aria-hidden="true">🏆</div>
                 <h3 class="feature-title">Beat Your Records</h3>
                 <p class="feature-desc">Track personal bests across all difficulty levels and watch your progress soar</p>
                 <div class="feature-visual">
@@ -136,7 +136,7 @@
 
             <!-- Feature 2 -->
             <article class="feature-card" data-tilt>
-                <div class="feature-icon">👻</div>
+                <div class="feature-icon" aria-hidden="true">👻</div>
                 <h3 class="feature-title">Ghost Mode</h3>
                 <p class="feature-desc">Race against your best performance in real-time with our ghost replay system</p>
                 <div class="feature-visual">
@@ -146,7 +146,7 @@
 
             <!-- Feature 3 -->
             <article class="feature-card" data-tilt>
-                <div class="feature-icon">🔥</div>
+                <div class="feature-icon" aria-hidden="true">🔥</div>
                 <h3 class="feature-title">Daily Streaks</h3>
                 <p class="feature-desc">Build consistency with streak tracking and never break the chain</p>
                 <div class="feature-visual">
@@ -156,7 +156,7 @@
 
             <!-- Feature 4 -->
             <article class="feature-card" data-tilt>
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon" aria-hidden="true">📊</div>
                 <h3 class="feature-title">Detailed Analytics</h3>
                 <p class="feature-desc">Track every keystroke with comprehensive stats and key-level accuracy</p>
                 <div class="feature-visual">
@@ -174,13 +174,13 @@
     <footer>
     <section class="footer-cta">
         <div class="privacy-badge">
-            <span class="badge-icon">🔒</span>
+            <span class="badge-icon" aria-hidden="true">🔒</span>
             <div class="badge-text">
                 <strong>Privacy First</strong>
                 <span>All data stays in your browser. No accounts. No tracking.</span>
             </div>
         </div>
-        <a href="./app.html" class="btn btn-large btn-glow">
+        <a href="./app.html" class="btn btn-large btn-glow" aria-label="Start typing test now - it's free">
             Start Typing Now - It's Free
         </a>
         <div class="footer-links">

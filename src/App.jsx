@@ -26,7 +26,16 @@ function App() {
   const [ghostReplay, setGhostReplay] = useState(null);
   const [streak, setStreak] = useState(0);
   const [bestWpm, setBestWpm] = useState(0);
-  const [lastText, setLastText] = useState('');
+  const [lastText, setLastText] = useState(() => {
+    // Initialize with the initial text so retry works on first load
+    if (mode === 'practice') return DIFFICULTY_TEXTS[level];
+    if (mode === 'lesson') {
+      const lesson = LESSONS.find(l => l.id === currentLessonId);
+      const wordCount = lessonLevel === 'basic' ? 20 : lessonLevel === 'intermediate' ? 40 : 60;
+      return generateLessonText(lesson?.keys, wordCount);
+    }
+    return '';
+  });
 
   // Initialize history on mount
   useEffect(() => {
@@ -73,7 +82,8 @@ function App() {
   useEffect(() => {
     if (status === 'running' && ghostReplay) {
       setWasRacingGhost(true);
-    } else if (status === 'idle') {
+    } else if (status === 'running' && !ghostReplay) {
+      // Reset when starting a new session without a ghost
       setWasRacingGhost(false);
     }
   }, [status, ghostReplay]);
@@ -93,7 +103,8 @@ function App() {
       } else {
         setBeatGhost(null);
       }
-    } else if (status === 'idle') {
+    } else if (status === 'running') {
+      // Reset when starting a new session
       setBeatGhost(null);
     }
   }, [status, wasRacingGhost, ghostReplay, userInput, text, ghostIndex]);
@@ -295,13 +306,12 @@ function App() {
               checked={ghostMode}
               onChange={(e) => {
                 setGhostMode(e.target.checked);
-                setTimeout(() => {
-                  if (inputRef.current) {
+                requestAnimationFrame(() => {
+                  if (inputRef.current && status !== 'finished') {
                     inputRef.current.focus();
                   }
-                }, 0);
+                });
               }}
-              onMouseDown={(e) => e.preventDefault()}
             />
             <span className={styles.ghostIcon}>👻</span>
           </label>

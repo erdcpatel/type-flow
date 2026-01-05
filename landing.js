@@ -3,11 +3,16 @@
 // Auto-typing animation, particles, and interactions
 // ==========================================
 
+// NOTE: This is a simplified DEMO implementation for the landing page.
+// The actual app uses WPM-based ghost calculations for accurate racing.
+// Landing page: Simple time-based animation for visual demonstration
+// App implementation: WPM-calculated progress based on recorded replay data
+
 // Configuration
 const CONFIG = {
     typingText: "The quick brown fox jumps over the lazy dog",
-    typingSpeed: 100, // ms per character
-    ghostSpeed: 80,   // ms per character (faster than user)
+    typingSpeed: 100, // ms per character (~60 WPM equivalent)
+    ghostSpeed: 80,   // ms per character (~75 WPM - 25% faster than user)
     targetWPM: 45,
     targetAccuracy: 98
 };
@@ -45,7 +50,8 @@ function initTypingDemo() {
     currentIndex = 0;
     ghostIndex = 0;
 
-    // Ghost cursor animation (faster)
+    // Ghost cursor animation (faster) - simplified demo version
+    // The actual app uses WPM-based calculation for accurate racing
     const ghostInterval = setInterval(() => {
         ghostIndex++;
         if (ghostIndex > text.length) {
