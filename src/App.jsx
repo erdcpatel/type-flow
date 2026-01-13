@@ -77,7 +77,7 @@ function App() {
   // Calculate if user beat the ghost
   const [beatGhost, setBeatGhost] = useState(null);
   const [wasRacingGhost, setWasRacingGhost] = useState(false);
-  
+
   // Track if we started with a ghost (not auto-refreshed after finish)
   useEffect(() => {
     if (status === 'running' && ghostReplay) {
@@ -87,7 +87,7 @@ function App() {
       setWasRacingGhost(false);
     }
   }, [status, ghostReplay]);
-  
+
   useEffect(() => {
     if (status === 'finished' && wasRacingGhost && ghostReplay) {
       // User finished - did they beat the ghost?
@@ -95,7 +95,7 @@ function App() {
       const correctChars = userInput.split('').filter((char, index) => char === text[index]).length;
       const userFinished = correctChars === text.length;
       const ghostFinished = ghostIndex >= text.length;
-      
+
       if (userFinished && !ghostFinished) {
         setBeatGhost(true);
       } else if (ghostFinished) {
@@ -252,7 +252,7 @@ function App() {
           <span className={styles.logo}>⚡</span>
           <h1 className={styles.brandText}>TypeFlow</h1>
         </div>
-        
+
         <div className={styles.navTabs}>
           {['practice', 'lesson', 'custom'].map(m => (
             <button
@@ -278,7 +278,7 @@ function App() {
               <span className={styles.streakNumber}>{streak}</span>
             </div>
           )}
-          <label 
+          <label
             className={`${styles.suddenDeathToggle} ${suddenDeath ? styles.suddenDeathActive : ''}`}
             data-tooltip="Sudden Death: Game ends immediately on your first mistake!"
           >
@@ -297,7 +297,7 @@ function App() {
             />
             <span className={styles.skull}>💀</span>
           </label>
-          <label 
+          <label
             className={`${styles.ghostToggle} ${ghostMode ? styles.ghostActive : ''}`}
             data-tooltip="Ghost Mode: Race against your best performance when you retry"
           >
@@ -315,14 +315,14 @@ function App() {
             />
             <span className={styles.ghostIcon}>👻</span>
           </label>
-          <button 
+          <button
             className={styles.statsButton}
             onClick={() => setShowStats(true)}
             data-tooltip="View detailed statistics and progress"
           >
             📊
           </button>
-          <button 
+          <button
             className={styles.settingsButton}
             onClick={() => setShowSettings(true)}
             data-tooltip="Settings and preferences"
@@ -355,13 +355,13 @@ function App() {
           const correctChars = userInput.split('').filter((char, index) => char === text[index]).length;
           const userProgress = (correctChars / text.length) * 100;
           const ghostProgress = (ghostIndex / text.length) * 100;
-          
+
           return (
             <div className={styles.raceContainer}>
               <div className={styles.raceBar}>
                 <div className={styles.raceLabel}>You</div>
                 <div className={styles.trackOuter}>
-                  <div 
+                  <div
                     className={styles.yourBar}
                     style={{ width: `${Math.min(userProgress, 100)}%` }}
                   >
@@ -374,7 +374,7 @@ function App() {
                   <span className={styles.ghostEmoji}>👻</span> Ghost
                 </div>
                 <div className={styles.trackOuter}>
-                  <div 
+                  <div
                     className={styles.ghostBar}
                     style={{ width: `${Math.min(ghostProgress, 100)}%` }}
                   >
@@ -459,6 +459,7 @@ function App() {
           history={history}
           onRestart={handleRestart}
           onRetry={handleRetry}
+          onHome={handleRestart}
           beatGhost={beatGhost}
         />
       )}

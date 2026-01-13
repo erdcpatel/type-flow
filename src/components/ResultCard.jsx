@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './ResultCard.module.css';
 import { getRecentAverage, getPercentileRank } from '../utils/storage';
 
-const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
+const ResultCard = ({ stats, history, onRestart, onRetry, onHome, beatGhost }) => {
     const [recentAvg, setRecentAvg] = useState(null);
     const [percentile, setPercentile] = useState(null);
     const [showCelebration, setShowCelebration] = useState(false);
@@ -52,8 +52,8 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                 <>
                     <div className={styles.particleBurst}>
                         {Array.from({ length: 30 }).map((_, i) => (
-                            <div 
-                                key={i} 
+                            <div
+                                key={i}
                                 className={styles.particle}
                                 style={{
                                     '--angle': `${(360 / 30) * i}deg`,
@@ -70,7 +70,7 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                     </div>
                 </>
             )}
-            
+
             {/* Ghost Wins */}
             {showCelebration && beatGhost === false && (
                 <>
@@ -86,7 +86,7 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                     </div>
                 </>
             )}
-            
+
             <div className={styles.card}>
                 <h2 className={styles.title}>
                     {isPersonalBest && '🏆 '}Session Complete{isPersonalBest && ' - New Record!'}
@@ -164,17 +164,17 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                 {/* Progress Chart - Only show if we have enough data */}
                 {history.length >= 3 && (
                     <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                        <h3 style={{ 
-                            fontSize: '1rem', 
-                            color: 'var(--color-text-muted)', 
+                        <h3 style={{
+                            fontSize: '1rem',
+                            color: 'var(--color-text-muted)',
                             marginBottom: '0.5rem',
                             textAlign: 'left'
                         }}>
                             Recent Progress
-                            <span style={{ 
-                                fontSize: '0.8rem', 
-                                marginLeft: '0.5rem', 
-                                opacity: 0.7 
+                            <span style={{
+                                fontSize: '0.8rem',
+                                marginLeft: '0.5rem',
+                                opacity: 0.7
                             }}>
                                 (Last {Math.min(15, history.length)} tests)
                             </span>
@@ -186,7 +186,7 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                                 const minWpm = Math.min(...wpmValues);
                                 const maxWpm = Math.max(...wpmValues);
                                 const wpmRange = maxWpm - minWpm || 1; // Avoid division by zero
-                                
+
                                 return recentTests.map((entry, i) => {
                                     // Scale relative to data range: 10% (min WPM) to 100% (max WPM)
                                     const normalized = (entry.wpm - minWpm) / wpmRange;
@@ -203,10 +203,10 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                                 });
                             })()}
                         </div>
-                        <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            fontSize: '0.75rem', 
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            fontSize: '0.75rem',
                             color: 'var(--color-text-muted)',
                             marginTop: '0.25rem',
                             paddingLeft: '1rem',
@@ -219,8 +219,16 @@ const ResultCard = ({ stats, history, onRestart, onRetry, beatGhost }) => {
                 )}
 
                 <div className={styles.actions}>
-                    <button 
-                        className={`${styles.button} ${styles.secondaryBtn}`} 
+                    <button
+                        className={`${styles.button} ${styles.secondaryBtn}`}
+                        onClick={onHome}
+                        title="Return to main menu"
+                        style={{ marginRight: 'auto' }}
+                    >
+                        🏠 Home
+                    </button>
+                    <button
+                        className={`${styles.button} ${styles.secondaryBtn}`}
                         onClick={onRetry}
                         title="Retry the same text to beat your time"
                     >

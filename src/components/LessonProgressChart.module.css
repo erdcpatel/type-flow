@@ -1,0 +1,80 @@
+.chartContainer {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.closeButton {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.graphWrapper {
+    flex: 1;
+    min-height: 300px;
+    width: 100%;
+}
+
+.placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-text-muted);
+    text-align: center;
+    min-height: 300px;
+}
+
+.customTooltip {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.tooltipDate {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.tooltipWpm {
+    margin: 0;
+    color: var(--color-primary);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.tooltipAcc {
+    margin: 0;
+    color: var(--color-success);
+    font-size: 0.9rem;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './StatsModal.module.css';
 import { getDailyStats, getStreak, getLessonProgress, getAggregateKeyStats, resetAllData, getHistory, getRecords } from '../utils/storage';
 import { LESSONS } from '../utils/lessons';
+import LessonProgressChart from './LessonProgressChart';
 
 const StatsModal = ({ onClose, onStartDrill }) => {
     const [stats, setStats] = useState(null);
@@ -13,6 +14,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
     const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'history', 'records', 'lessons', 'keys'
     const [loading, setLoading] = useState(true);
     const [expandedTest, setExpandedTest] = useState(null);
+    const [selectedLesson, setSelectedLesson] = useState(null);
 
     // Load all stats on mount
     useEffect(() => {
@@ -95,35 +97,56 @@ const StatsModal = ({ onClose, onStartDrill }) => {
         </>
     );
 
-    const renderLessons = () => (
-        <div className={styles.lessonsGrid}>
-            {LESSONS.map(lesson => {
-                const s = lessonStats[lesson.id];
-                return (
-                    <div key={lesson.id} className={`${styles.lessonCard} ${!s ? styles.lessonCardEmpty : ''}`}>
-                        <div className={styles.lessonHeader}>
-                            <strong>{lesson.title}</strong>
-                            {s && <span className={styles.badge}>{s.attempts} attempts</span>}
-                        </div>
-                        {s ? (
-                            <div className={styles.lessonStats}>
-                                <div className={styles.miniStat}>
-                                    <span className={styles.label}>Best WPM</span>
-                                    <span className={styles.value}>{s.bestWpm}</span>
-                                </div>
-                                <div className={styles.miniStat}>
-                                    <span className={styles.label}>Avg Acc</span>
-                                    <span className={styles.value}>{s.avgAccuracy}%</span>
-                                </div>
+    const renderLessons = () => {
+        if (selectedLesson) {
+            const lessonHistory = history.filter(h => h.mode === 'lesson' && h.level === selectedLesson.id);
+            return (
+                <LessonProgressChart
+                    history={lessonHistory}
+                    title={selectedLesson.title}
+                    onClose={() => setSelectedLesson(null)}
+                />
+            );
+        }
+
+        return (
+            <div className={styles.lessonsGrid}>
+                {LESSONS.map(lesson => {
+                    const s = lessonStats[lesson.id];
+                    return (
+                        <div
+                            key={lesson.id}
+                            className={`${styles.lessonCard} ${!s ? styles.lessonCardEmpty : ''}`}
+                            onClick={() => s && setSelectedLesson(lesson)}
+                            style={{ cursor: s ? 'pointer' : 'default' }}
+                        >
+                            <div className={styles.lessonHeader}>
+                                <strong>{lesson.title}</strong>
+                                {s && <span className={styles.badge}>{s.attempts} attempts</span>}
                             </div>
-                        ) : (
-                            <div className={styles.noDataInline}>Not started</div>
-                        )}
-                    </div>
-                );
-            })}
-        </div>
-    );
+                            {s ? (
+                                <div className={styles.lessonStats}>
+                                    <div className={styles.miniStat}>
+                                        <span className={styles.label}>Best WPM</span>
+                                        <span className={styles.value}>{s.bestWpm}</span>
+                                    </div>
+                                    <div className={styles.miniStat}>
+                                        <span className={styles.label}>Avg Acc</span>
+                                        <span className={styles.value}>{s.avgAccuracy}%</span>
+                                    </div>
+                                    <div className={styles.clickHint} style={{ fontSize: '0.8rem', marginTop: '0.5rem', opacity: 0.7 }}>
+                                        Click to view progress →
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className={styles.noDataInline}>Not started</div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
 
     const renderKeys = () => {
         const sortedKeys = Object.entries(keyStats).sort((a, b) => a[1].accuracy - b[1].accuracy);
@@ -196,7 +219,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                 <div className={styles.tableBody}>
                     {history.map((test, index) => (
                         <React.Fragment key={test.id || index}>
-                            <div 
+                            <div
                                 className={`${styles.tableRow} ${expandedTest === index ? styles.expanded : ''}`}
                                 onClick={() => setExpandedTest(expandedTest === index ? null : index)}
                             >
@@ -226,7 +249,7 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                                                 let color = 'var(--color-success)';
                                                 if (acc < 80) color = 'var(--color-danger)';
                                                 else if (acc < 94) color = 'var(--color-warning)';
-                                                
+
                                                 return (
                                                     <div key={key} className={styles.miniKeyItem} style={{ borderColor: color }}>
                                                         <span className={styles.miniKeyChar}>{key}</span>
@@ -330,6 +353,12 @@ const StatsModal = ({ onClose, onStartDrill }) => {
                     {activeTab === 'records' && renderRecords()}
                     {activeTab === 'lessons' && renderLessons()}
                     {activeTab === 'keys' && renderKeys()}
+                </div>
+
+                <div className={styles.modalFooter}>
+                    <button className={styles.closeButtonMain} onClick={onClose}>
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
