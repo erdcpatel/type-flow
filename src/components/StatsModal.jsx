@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './StatsModal.module.css';
-import { getDailyStats, getStreak, getLessonProgress, getAggregateKeyStats, resetAllData, getHistory, getRecords } from '../utils/storage';
+import { getDailyStats, getStreak, getLessonProgress, getAggregateKeyStats, getHistory, getRecords } from '../utils/storage';
 import { LESSONS } from '../utils/lessons';
 import LessonProgressChart from './LessonProgressChart';
 
@@ -20,19 +20,26 @@ const StatsModal = ({ onClose, onStartDrill }) => {
     useEffect(() => {
         const loadStats = async () => {
             try {
-                const [dailyData, streakData, lessonData, keyData, historyData, recordsData] = await Promise.all([
-                    getDailyStats(),
-                    getStreak(),
-                    getLessonProgress(),
-                    getAggregateKeyStats(),
-                    getHistory(),
-                    getRecords()
+                // Fetch history first to reuse it
+                const historyData = await getHistory();
+
+                // Sort newest first
+                const sortedHistory = historyData.sort((a, b) => b.timestamp - a.timestamp);
+                setHistory(sortedHistory);
+
+                // Use the fetched history for all other stats
+                const [dailyData, streakData, lessonData, keyData, recordsData] = await Promise.all([
+                    getDailyStats(historyData),
+                    getStreak(historyData),
+                    getLessonProgress(historyData),
+                    getAggregateKeyStats(historyData),
+                    getRecords(historyData)
                 ]);
+
                 setStats(dailyData);
                 setStreak(streakData);
                 setLessonStats(lessonData);
                 setKeyStats(keyData);
-                setHistory(historyData.sort((a, b) => b.timestamp - a.timestamp)); // Sort newest first
                 setRecords(recordsData);
             } catch (error) {
                 console.error('Failed to load stats:', error);

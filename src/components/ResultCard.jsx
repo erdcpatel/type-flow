@@ -11,13 +11,14 @@ const ResultCard = ({ stats, history, onRestart, onRetry, onHome, beatGhost }) =
     // Load comparison data
     useEffect(() => {
         const loadComparisons = async () => {
-            const avg = await getRecentAverage(10);
-            const rank = await getPercentileRank(stats.wpm);
+            // Use props history if available to avoid refetching
+            const avg = await getRecentAverage(10, history);
+            const rank = await getPercentileRank(stats.wpm, history);
             setRecentAvg(avg);
             setPercentile(rank);
         };
         loadComparisons();
-    }, [stats.wpm]);
+    }, [stats.wpm, history]);
 
     // Trigger celebration when beatGhost is set (separate effect)
     useEffect(() => {

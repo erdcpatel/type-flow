@@ -67,8 +67,8 @@ export const calculateStatsFromHistory = (history) => {
 };
 
 
-export const getDailyStats = async () => {
-    const history = await getHistory();
+export const getDailyStats = async (providedHistory = null) => {
+    const history = providedHistory || await getHistory();
     const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 
     // Group by date using the stored dateString
@@ -105,8 +105,8 @@ export const getDailyStats = async () => {
 };
 
 
-export const getStreak = async () => {
-    const history = await getHistory();
+export const getStreak = async (providedHistory = null) => {
+    const history = providedHistory || await getHistory();
     if (history.length === 0) return 0;
 
     // Get unique dates sorted descending using dateString
@@ -144,8 +144,8 @@ export const getStreak = async () => {
 };
 
 
-export const getLessonProgress = async () => {
-    const history = await getHistory();
+export const getLessonProgress = async (providedHistory = null) => {
+    const history = providedHistory || await getHistory();
     const progress = {};
 
     history.forEach(entry => {
@@ -179,8 +179,8 @@ export const getLessonProgress = async () => {
 };
 
 
-export const getAggregateKeyStats = async () => {
-    const history = await getHistory();
+export const getAggregateKeyStats = async (providedHistory = null) => {
+    const history = providedHistory || await getHistory();
     const keyStats = {};
 
     history.forEach(entry => {
@@ -206,8 +206,11 @@ export const getAggregateKeyStats = async () => {
     return keyStats;
 };
 
-export const getWeakKeys = async () => {
-    const keyStats = await getAggregateKeyStats();
+export const getWeakKeys = async (providedHistory = null) => {
+    // If history is provided, we need to pass it to getAggregateKeyStats
+    // But getAggregateKeyStats is async even if history is provided because of existing signature,
+    // though internally it won't await db if history is there.
+    const keyStats = await getAggregateKeyStats(providedHistory);
     const allKeys = Object.entries(keyStats);
 
     // Filter for keys with at least 5 attempts to be statistically significant
@@ -241,9 +244,9 @@ export const getWeakKeys = async () => {
 /**
  * Get personal records from history
  */
-export const getRecords = async () => {
-    const history = await getHistory();
-    
+export const getRecords = async (providedHistory = null) => {
+    const history = providedHistory || await getHistory();
+
     if (history.length === 0) {
         return {
             bestWpm: 0,
@@ -257,8 +260,9 @@ export const getRecords = async () => {
 
     const bestWpm = Math.max(...history.map(h => h.wpm));
     const bestAccuracy = Math.max(...history.map(h => h.accuracy));
-    const streak = await getStreak();
-    
+    // Pass history to getStreak to avoid re-fetch
+    const streak = await getStreak(history);
+
     // Calculate most tests in a day
     const dailyGroups = history.reduce((acc, entry) => {
         const date = entry.dateString || new Date(entry.timestamp).toLocaleDateString('en-CA');
@@ -298,9 +302,9 @@ export const getRecords = async () => {
 /**
  * Get recent average for comparison (last N tests)
  */
-export const getRecentAverage = async (count = 10) => {
-    const history = await getHistory();
-    
+export const getRecentAverage = async (count = 10, providedHistory = null) => {
+    const history = providedHistory || await getHistory();
+
     if (history.length === 0) {
         return { wpm: 0, accuracy: 0, count: 0 };
     }
@@ -323,9 +327,9 @@ export const getRecentAverage = async (count = 10) => {
 /**
  * Calculate percentile rank for a test result
  */
-export const getPercentileRank = async (wpm) => {
-    const history = await getHistory();
-    
+export const getPercentileRank = async (wpm, providedHistory = null) => {
+    const history = providedHistory || await getHistory();
+
     if (history.length === 0) return 100;
 
     const betterCount = history.filter(h => h.wpm < wpm).length;
